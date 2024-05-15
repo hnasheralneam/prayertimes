@@ -1,0 +1,29 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "hnasheralneam@gmail.com",
+                "Name": "Hamza Nasher-Alneam",
+                "Name[ar]": "حمزة ناشر النعم"
+            }
+        ],
+        "BugReportUrl": "https://github.com/hnasheralneam/prayertimeswidget/issues",
+        "Category": "Date and Time",
+        "Description": "Prayer times clock on your desktop",
+        "Description[ar]": "ساعة الصلاة على مكتبك",
+        "EnabledByDefault": true,
+        "FormFactors": [
+            "tablet",
+            "handset",
+            "desktop"
+        ],
+        "Icon": "player-time",
+        "Id": "com.github.hnasheralneam.prayertimeswidget",
+        "License": "GPL-3.0+",
+        "Name": "Prayer times",
+        "Name[ar]": "ساعة الصلاة",
+        "Website": "https://github.com/hnasheralneam/prayertimeswidget"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

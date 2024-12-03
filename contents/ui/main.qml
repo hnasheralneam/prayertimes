@@ -9,32 +9,20 @@ PlasmoidItem {
    width: Kirigami.Units.gridUnit * 15
    height: Kirigami.Units.gridUnit * 25
 
-   // property bool inTray: (plasmoid.containmentDisplayHints & PlasmaCore.Types.ContainmentDrawsPlasmoidHeading)
    property bool isSmall: width < (Kirigami.Units.gridUnit * 10) || height < (Kirigami.Units.gridUnit * 10)
 
    preferredRepresentation: isSmall ? compactRepresentation : fullRepresentation
 
-   compactRepresentation: CompactRepresentation {
-      anchors.fill: parentq
-   }
-   // Column {
-   //    id: compactRepresentation
-
-   //    Label {
-   //       id: compactText
-   //       text: "Hello world"
-   //    }
-   // }
+   compactRepresentation: CompactRepresentation { }
 
    fullRepresentation: Column {
         id: prayerClock
 
-        function submit() {
-            var URL = "http://api.aladhan.com/v1/timingsByCity?city=" + Plasmoid.configuration.city + "&country=" + Plasmoid.configuration.country + "&method=2";
+        function refresh_times() {
+            let URL = "http://api.aladhan.com/v1/timingsByCity?city=" + Plasmoid.configuration.city + "&country=" + Plasmoid.configuration.country + "&method=2";
             request(URL, (o) => {
                 if (o.status === 200) {
-                    console.log(o.responseText);
-                    var data = JSON.parse(o.responseText).data;
+                    let data = JSON.parse(o.responseText).data;
                     fajrTime.text = data.timings.Fajr;
                     sunriseTime.text = data.timings.Sunrise;
                     dhuhrTime.text = data.timings.Dhuhr;
@@ -48,7 +36,7 @@ PlasmoidItem {
         }
 
         function request(url, callback) {
-            var xhr = new XMLHttpRequest();
+            let xhr = new XMLHttpRequest();
             xhr.onreadystatechange = (function(myxhr) {
                 return function() {
                     if (myxhr.readyState === 4)
@@ -60,8 +48,15 @@ PlasmoidItem {
             xhr.send();
         }
 
+        Item {
+            Timer {
+                interval: 3600000; running: true; repeat: true // repeating hourly
+                onTriggered: refresh_times();
+            }
+        }
+
         Component.onCompleted: {
-            submit();
+            refresh_times();
         }
 
         Column {
@@ -88,6 +83,10 @@ PlasmoidItem {
                 bottomPadding: 10
             }
 
+            // PrayerTimeBlock {
+            //     prayer: "Fajr"
+            // }
+            
             Rectangle {
                 id: fajr
 
@@ -117,7 +116,7 @@ PlasmoidItem {
                 }
 
             }
-
+            
             MenuSeparator {
                 topPadding: 5
                 bottomPadding: 5
@@ -331,7 +330,7 @@ PlasmoidItem {
             Button {
                 text: "Refresh times"
                 anchors.horizontalCenter: parent.horizontalCenter
-                onClicked: submit()
+                onClicked: refresh_times()
             }
 
         }

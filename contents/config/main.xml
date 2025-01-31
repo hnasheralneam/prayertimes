@@ -11,6 +11,9 @@
     <entry name="country" type="String">
       <default>United States</default>
     </entry>
+    <entry name="method" type="String">
+      <default>2</default>
+    </entry>
    </group>
 
 

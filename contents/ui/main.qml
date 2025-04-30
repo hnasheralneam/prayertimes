@@ -99,12 +99,10 @@ PlasmoidItem {
         }
 
         function refresh_times() {
-            let URL = "https://api.aladhan.com/v1/timingsByCity/timingsByCity?city=" + Plasmoid.configuration.city + "&country=" + Plasmoid.configuration.country + "&method=1";
-            console.log(URL);
+            let URL = "https://api.aladhan.com/v1/timingsByCity/timingsByCity?city=" + Plasmoid.configuration.city + "&country=" + Plasmoid.configuration.country + "&method="  + Plasmoid.configuration.method;
             request(URL, (o) => {
                 if (o.status === 200) {
                     let data = JSON.parse(o.responseText).data;
-
                     findHighlighted(data.timings);
 
                     let isActive = Plasmoid.configuration.hourFormat;

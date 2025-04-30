@@ -11,21 +11,23 @@
     <entry name="country" type="String">
       <default>United States</default>
     </entry>
+    <entry name="hourFormat" type="Bool">
+      <default>true</default>
+    </entry>
    </group>
-
 
    <group name="About">
       <entry name="author" type="String">
-         <default>Hamza Nasher-Alneam</default>
+         <default>Ammar Elmesaly</default>
       </entry>
       <entry name="email" type="String">
-         <default>hnasheralneam@gmail.com</default>
+         <default>ammar-elmesaly@proton.me</default>
       </entry>
       <entry name="version" type="String">
-         <default>0.1.0</default>
+         <default>0.2.0</default>
       </entry>
       <entry name="citations" type="String">
-         <default>Forked from Marco Martin's analogclock</default>
+         <default>Forked from Hamza Nasher-Alneam's fork of Marco Martin's analogclock</default>
       </entry>
    </group>
 </kcfg>

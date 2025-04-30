@@ -4,8 +4,10 @@ import org.kde.kirigami 2.5 as Kirigami
 import org.kde.kcmutils as KCM
 
 KCM.SimpleKCM {
-   property alias cfg_city: cityField.text
-   property alias cfg_country: countryField.text
+
+    property alias cfg_city: cityField.text
+    property alias cfg_country: countryField.text
+    property alias cfg_hourFormat: hourFormatCheckBox.checked
 
     Kirigami.FormLayout {
       TextField {
@@ -18,5 +20,10 @@ KCM.SimpleKCM {
           Kirigami.FormData.label: i18n("Country:")
           placeholderText: i18n("eg. United States")
       }
+      CheckBox {
+          id: hourFormatCheckBox
+          Kirigami.FormData.label: i18n("12-Hour Format:")
+      }
    }
 }
+

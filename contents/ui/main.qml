@@ -18,15 +18,23 @@ PlasmoidItem {
     fullRepresentation: Column {
         id: prayerClock
 
-        function formatTime(date, format) {
-            let dateObj = new Date(date);
-            let hours, mins;
-            if (dateObj.getHours().toString().length < 2) hours = `0${dateObj.getHours()}`;
-            else hours = `${dateObj.getHours()}`;
-            if (dateObj.getMinutes().toString().length < 2) mins = `0${dateObj.getMinutes()}`;
-            else mins = `${dateObj.getMinutes()}`;
-            return `${hours}:${mins}`;
+        function to12HourTime(timeString, isActive) {
+            if (isActive) {  // if checkbox is active, convert to 12-hour format
+                let parts = timeString.split(':');
+                let hours =  parseInt(parts[0], 10);
+                let minutes = parseInt(parts[1], 10);
+                let period = hours >= 12 ? "PM" : "AM";
+                hours = hours % 12 || 12;
+                if (minutes > 9) {
+                    return `${hours}:${minutes} ${period}`;
+                } else {
+                    return `${hours}:0${minutes} ${period}`;
+                }
+            } else {  // no change
+                return timeString;
+            }
         }
+
         function parseTime(timeString) {
             let parts = timeString.split(':');
             let dateObj = new Date();
@@ -91,20 +99,21 @@ PlasmoidItem {
         }
 
         function refresh_times() {
-            let URL = "http://api.aladhan.com/v1/timingsByCity?city=" + Plasmoid.configuration.city + "&country=" + Plasmoid.configuration.country + "&method=2";
+            let URL = "https://api.aladhan.com/v1/timingsByCity/timingsByCity?city=" + Plasmoid.configuration.city + "&country=" + Plasmoid.configuration.country + "&method=1";
+            console.log(URL);
             request(URL, (o) => {
                 if (o.status === 200) {
                     let data = JSON.parse(o.responseText).data;
 
                     findHighlighted(data.timings);
 
-
-                    fajrTime.text = data.timings.Fajr;
-                    sunriseTime.text = data.timings.Sunrise;
-                    dhuhrTime.text = data.timings.Dhuhr;
-                    asrTime.text = data.timings.Asr;
-                    maghribTime.text = data.timings.Maghrib;
-                    ishaTime.text = data.timings.Isha;
+                    let isActive = Plasmoid.configuration.hourFormat;
+                    fajrTime.text = to12HourTime(data.timings.Fajr, isActive);
+                    sunriseTime.text = to12HourTime(data.timings.Sunrise, isActive);
+                    dhuhrTime.text = to12HourTime(data.timings.Dhuhr, isActive);
+                    asrTime.text = to12HourTime(data.timings.Asr, isActive);
+                    maghribTime.text = to12HourTime(data.timings.Maghrib, isActive);
+                    ishaTime.text = to12HourTime(data.timings.Isha, isActive);
                 } else {
                     console.log("Some error has occurred");
                 }
@@ -139,9 +148,6 @@ PlasmoidItem {
         }
 
         Column {
-            // PrayerTimeBlock {
-            //     prayer: "Fajr"
-            // }
 
             anchors.horizontalCenter: parent.horizontalCenter
 

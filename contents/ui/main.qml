@@ -67,34 +67,34 @@ PlasmoidItem {
             ishaTime.color = Kirigami.Theme.textColor;
 
             if (Date.now() > parseTime(timings.Isha)) {
+                fajr.color = Kirigami.Theme.highlightColor;
+                fajrTitle.color = Kirigami.Theme.neutralBackgroundColor;
+                fajrTime.color = Kirigami.Theme.neutralBackgroundColor;
+            }
+            else if (Date.now() > parseTime(timings.Maghrib)) {
                 isha.color = Kirigami.Theme.highlightColor;
                 ishaTitle.color = Kirigami.Theme.neutralBackgroundColor;
                 ishaTime.color = Kirigami.Theme.neutralBackgroundColor;
             }
-            else if (Date.now() > parseTime(timings.Maghrib)) {
+            else if (Date.now() > parseTime(timings.Asr)) {
                 maghrib.color = Kirigami.Theme.highlightColor;
                 maghribTitle.color = Kirigami.Theme.neutralBackgroundColor;
                 maghribTime.color = Kirigami.Theme.neutralBackgroundColor;
             }
-            else if (Date.now() > parseTime(timings.Asr)) {
+            else if (Date.now() > parseTime(timings.Dhuhr)) {
                 asr.color = Kirigami.Theme.highlightColor;
                 asrTitle.color = Kirigami.Theme.neutralBackgroundColor;
                 asrTime.color = Kirigami.Theme.neutralBackgroundColor;
             }
-            else if (Date.now() > parseTime(timings.Dhuhr)) {
+            else if (Date.now() > parseTime(timings.Sunrise)) {
                 dhuhr.color = Kirigami.Theme.highlightColor;
                 dhuhrTitle.color = Kirigami.Theme.neutralBackgroundColor;
                 dhuhrTime.color = Kirigami.Theme.neutralBackgroundColor;
             }
-            else if (Date.now() > parseTime(timings.Sunrise)) {
+            else if (Date.now() > parseTime(timings.Fajr)) {
                 sunrise.color = Kirigami.Theme.highlightColor;
                 sunriseTitle.color = Kirigami.Theme.neutralBackgroundColor;
                 sunriseTime.color = Kirigami.Theme.neutralBackgroundColor;
-            }
-            else if (Date.now() > parseTime(timings.Fajr)) {
-                fajr.color = Kirigami.Theme.highlightColor;
-                fajrTitle.color = Kirigami.Theme.neutralBackgroundColor;
-                fajrTime.color = Kirigami.Theme.neutralBackgroundColor;
             }
         }
 
@@ -146,7 +146,7 @@ PlasmoidItem {
         }
 
         Column {
-
+            width: parent.width * 5 / 6
             anchors.horizontalCenter: parent.horizontalCenter
 
             Label {
@@ -174,7 +174,6 @@ PlasmoidItem {
      
             Rectangle {
                 id: fajr
-
                 width: parent.width
                 color: Kirigami.Theme.highlightColor
                 height: 28

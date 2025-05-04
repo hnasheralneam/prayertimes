@@ -6,8 +6,8 @@ import org.kde.plasma.components 3.0 as PlasmaComponents
 import org.kde.plasma.plasmoid 2.0
 
 PlasmoidItem {
-    property bool isSmall: width < (Kirigami.Units.gridUnit * 10) || height < (Kirigami.Units.gridUnit * 10)
 
+    property bool isSmall: width < (Kirigami.Units.gridUnit * 10) || height < (Kirigami.Units.gridUnit * 10)
     width: Kirigami.Units.gridUnit * 15
     height: Kirigami.Units.gridUnit * 25
     preferredRepresentation: isSmall ? compactRepresentation : fullRepresentation
@@ -42,6 +42,22 @@ PlasmoidItem {
             dateObj.setMinutes(parseInt(parts[1], 10));
             dateObj.setSeconds(0);
             return dateObj;
+        }
+
+        function getPrayerName(languageIndex, prayer) {
+            if (languageIndex === 0 || languageIndex === undefined) {
+                return prayer;
+            } else {
+                let arabicPrayers = {
+                    "Fajr": "الفجر",
+                    "Sunrise": "الشروق",
+                    "Dhuhr": "الظهر",
+                    "Asr": "العصر",
+                    "Maghrib": "المغرب",
+                    "Isha": "العشاء"
+                }
+                return arabicPrayers[prayer];
+            }
         }
 
         function findHighlighted(timings) {
@@ -136,6 +152,11 @@ PlasmoidItem {
         }
 
         Item {
+            Component.onCompleted: {  // default initialization to 0 (English)
+                if (plasmoid.configuration.languageIndex === undefined) {
+                    plasmoid.configuration.languageIndex = 0;
+                }
+            }
             Timer {
                 interval: 3.6e+06 // repeating hourly
                 running: true
@@ -152,7 +173,7 @@ PlasmoidItem {
             Label {
                 id: titleLabel
 
-                text: "Prayer Times"
+                text: Plasmoid.configuration.languageIndex === 0 ? "Prayer Times" : "مواقيت الصلاة"
                 font.pixelSize: 24
                 anchors.horizontalCenter: parent.horizontalCenter
             }
@@ -175,28 +196,33 @@ PlasmoidItem {
             Rectangle {
                 id: fajr
                 width: parent.width
-                color: Kirigami.Theme.highlightColor
+                color: Kirigami.Theme.neutralBackgroundColor
                 height: 28
                 radius: 8
 
-                Text {
-                    id: fajrTitle
+                RowLayout {
+                    anchors.fill: parent
+                    layoutDirection: Plasmoid.configuration.languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
+                    
+                    Label {
+                        id: fajrTitle
+                        text: getPrayerName(Plasmoid.configuration.languageIndex, "Fajr")
+                        Layout.alignment: Qt.AlignLeft
+                        font.pixelSize: 20
+                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
+                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
+                    }
 
-                    fontSizeMode: Text.Fit
-                    text: "Fajr"
-                    color: Kirigami.Theme.neutralBackgroundColor
-                    font.pixelSize: 20
-                    leftPadding: 5
-                }
+                    Label {
+                        id: fajrTime
 
-                Text {
-                    id: fajrTime
-
-                    anchors.right: parent.right
-                    text: "00:00"
-                    color: Kirigami.Theme.neutralBackgroundColor
-                    font.pixelSize: 20
-                    rightPadding: 5
+                        text: "00:00"
+                        Layout.alignment: Qt.AlignRight
+                        color: Kirigami.Theme.textColor;
+                        font.pixelSize: 20
+                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
+                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
+                    }
                 }
 
             }
@@ -214,30 +240,35 @@ PlasmoidItem {
 
             Rectangle {
                 id: sunrise
-
                 width: parent.width
                 color: Kirigami.Theme.neutralBackgroundColor
                 height: 28
                 radius: 8
 
-                Text {
-                    id: sunriseTitle
+                RowLayout {
+                    anchors.fill: parent
+                    layoutDirection: Plasmoid.configuration.languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
+                    
+                    Label {
+                        id: sunriseTitle
+                        text: getPrayerName(Plasmoid.configuration.languageIndex, "Sunrise")
+                        Layout.alignment: Qt.AlignLeft
+                        font.pixelSize: 20
+                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
+                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
+                        
+                    }
 
-                    fontSizeMode: Text.Fit
-                    text: "Sunrise"
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    leftPadding: 5
-                }
+                    Label {
+                        id: sunriseTime
 
-                Text {
-                    id: sunriseTime
-
-                    anchors.right: parent.right
-                    text: "00:00"
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    rightPadding: 5
+                        text: "00:00"
+                        Layout.alignment: Qt.AlignRight
+                        color: Kirigami.Theme.textColor;
+                        font.pixelSize: 20
+                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
+                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
+                    }
                 }
 
             }
@@ -255,30 +286,35 @@ PlasmoidItem {
 
             Rectangle {
                 id: dhuhr
-
                 width: parent.width
                 color: Kirigami.Theme.neutralBackgroundColor
                 height: 28
                 radius: 8
 
-                Text {
-                    id: dhuhrTitle
+                RowLayout {
+                    anchors.fill: parent
+                    layoutDirection: Plasmoid.configuration.languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
+                    
+                    Label {
+                        id: dhuhrTitle
+                        text: getPrayerName(Plasmoid.configuration.languageIndex, "Dhuhr")
+                        Layout.alignment: Qt.AlignLeft
+                        font.pixelSize: 20
+                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
+                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
+                        
+                    }
 
-                    fontSizeMode: Text.Fit
-                    text: "Dhuhr"
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    leftPadding: 5
-                }
+                    Label {
+                        id: dhuhrTime
 
-                Text {
-                    id: dhuhrTime
-
-                    anchors.right: parent.right
-                    text: "00:00"
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    rightPadding: 5
+                        text: "00:00"
+                        Layout.alignment: Qt.AlignRight
+                        color: Kirigami.Theme.textColor;
+                        font.pixelSize: 20
+                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
+                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
+                    }
                 }
 
             }
@@ -296,30 +332,35 @@ PlasmoidItem {
 
             Rectangle {
                 id: asr
-
                 width: parent.width
                 color: Kirigami.Theme.neutralBackgroundColor
                 height: 28
                 radius: 8
 
-                Text {
-                    id: asrTitle
+                RowLayout {
+                    anchors.fill: parent
+                    layoutDirection: Plasmoid.configuration.languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
+                    
+                    Label {
+                        id: asrTitle
+                        text: getPrayerName(Plasmoid.configuration.languageIndex, "Asr")
+                        Layout.alignment: Qt.AlignLeft
+                        font.pixelSize: 20
+                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
+                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
+                        
+                    }
 
-                    fontSizeMode: Text.Fit
-                    text: "Asr"
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    leftPadding: 5
-                }
+                    Label {
+                        id: asrTime
 
-                Text {
-                    id: asrTime
-
-                    anchors.right: parent.right
-                    text: "00:00"
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    rightPadding: 5
+                        text: "00:00"
+                        Layout.alignment: Qt.AlignRight
+                        color: Kirigami.Theme.textColor;
+                        font.pixelSize: 20
+                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
+                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
+                    }
                 }
 
             }
@@ -337,30 +378,35 @@ PlasmoidItem {
 
             Rectangle {
                 id: maghrib
-
                 width: parent.width
                 color: Kirigami.Theme.neutralBackgroundColor
                 height: 28
                 radius: 8
 
-                Text {
-                    id: maghribTitle
+                RowLayout {
+                    anchors.fill: parent
+                    layoutDirection: Plasmoid.configuration.languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
+                    
+                    Label {
+                        id: maghribTitle
+                        text: getPrayerName(Plasmoid.configuration.languageIndex, "Maghrib")
+                        Layout.alignment: Qt.AlignLeft
+                        font.pixelSize: 20
+                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
+                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
+                        
+                    }
 
-                    fontSizeMode: Text.Fit
-                    text: "Maghrib"
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    leftPadding: 5
-                }
+                    Label {
+                        id: maghribTime
 
-                Text {
-                    id: maghribTime
-
-                    anchors.right: parent.right
-                    text: "00:00"
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    rightPadding: 5
+                        text: "00:00"
+                        Layout.alignment: Qt.AlignRight
+                        color: Kirigami.Theme.textColor;
+                        font.pixelSize: 20
+                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
+                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
+                    }
                 }
 
             }
@@ -378,30 +424,35 @@ PlasmoidItem {
 
             Rectangle {
                 id: isha
-
                 width: parent.width
                 color: Kirigami.Theme.neutralBackgroundColor
                 height: 28
                 radius: 8
 
-                Text {
-                    id: ishaTitle
+                RowLayout {
+                    anchors.fill: parent
+                    layoutDirection: Plasmoid.configuration.languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
+                    
+                    Label {
+                        id: ishaTitle
+                        text: getPrayerName(Plasmoid.configuration.languageIndex, "Isha")
+                        Layout.alignment: Qt.AlignLeft
+                        font.pixelSize: 20
+                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
+                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
+                        
+                    }
 
-                    fontSizeMode: Text.Fit
-                    text: "Isha"
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    leftPadding: 5
-                }
+                    Label {
+                        id: ishaTime
 
-                Text {
-                    id: ishaTime
-
-                    anchors.right: parent.right
-                    text: "00:00"
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    rightPadding: 5
+                        text: "00:00"
+                        Layout.alignment: Qt.AlignRight
+                        color: Kirigami.Theme.textColor;
+                        font.pixelSize: 20
+                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
+                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
+                    }
                 }
 
             }
@@ -417,7 +468,5 @@ PlasmoidItem {
                 onClicked: refresh_times()
             }
         }
-
     }
-
 }

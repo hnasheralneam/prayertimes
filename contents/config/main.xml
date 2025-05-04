@@ -14,22 +14,25 @@
     <entry name="hourFormat" type="Bool">
       <default>true</default>
     </entry>
+    <entry name="language" type="StringList">
+      <default>English,Arabic</default>
+    </entry>
     <entry name="method" type="String">
     </entry>
    </group>
 
    <group name="About">
       <entry name="author" type="String">
-         <default>Ammar Elmesaly</default>
+         <default>Hamza Nasher-Alneam</default>
       </entry>
       <entry name="email" type="String">
-         <default>ammar-elmesaly@proton.me</default>
+         <default>hnasheralneam@gmail.com</default>
       </entry>
       <entry name="version" type="String">
-         <default>0.2.0</default>
+         <default>0.1.0</default>
       </entry>
       <entry name="citations" type="String">
-         <default>Forked from Hamza Nasher-Alneam's fork of Marco Martin's analogclock</default>
+         <default>Forked from Marco Martin's analogclock</default>
       </entry>
    </group>
 </kcfg>

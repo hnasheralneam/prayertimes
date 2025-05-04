@@ -9,6 +9,8 @@ KCM.SimpleKCM {
     property alias cfg_country: countryField.text
     property alias cfg_hourFormat: hourFormatCheckBox.checked
     property alias cfg_method: methodField.text
+    property alias cfg_languageIndex: languageField.currentIndex
+
     Kirigami.FormLayout {
       TextField {
           id: cityField
@@ -24,6 +26,12 @@ KCM.SimpleKCM {
           id: methodField
           Kirigami.FormData.label: i18n("Method:")
           placeholderText: i18n("default: auto, refrer https://aladhan.com/prayer-times-api/")
+      }
+      ComboBox {
+          id: languageField
+          Kirigami.FormData.label: i18n("Language:")
+          model: ["English", "العربية"]
+          currentIndex: plasmoid.configuration.languageIndex
       }
       CheckBox {
           id: hourFormatCheckBox

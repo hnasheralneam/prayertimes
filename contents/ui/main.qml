@@ -8,15 +8,28 @@ import org.kde.plasma.plasmoid 2.0
 PlasmoidItem {
 
     property bool isSmall: width < (Kirigami.Units.gridUnit * 10) || height < (Kirigami.Units.gridUnit * 10)
+    property int languageIndex: Plasmoid.configuration.languageIndex !== undefined ? Plasmoid.configuration.languageIndex : 0
+
     width: Kirigami.Units.gridUnit * 15
     height: Kirigami.Units.gridUnit * 25
     preferredRepresentation: isSmall ? compactRepresentation : fullRepresentation
 
+    Connections {
+        target: Plasmoid
+        onConfigurationChanged: {
+            languageUpdate();  // Update language when configuration is altered
+        }
+    }
     compactRepresentation: CompactRepresentation {
     }
 
     fullRepresentation: Column {
         id: prayerClock
+        
+        function languageUpdate() {
+            languageIndex = Plasmoid.configuration.languageIndex; // change language
+        }
+
 
         function to12HourTime(timeString, isActive) {
             if (isActive) {  // if checkbox is active, convert to 12-hour format
@@ -35,6 +48,7 @@ PlasmoidItem {
             }
         }
 
+
         function parseTime(timeString) {
             let parts = timeString.split(':');
             let dateObj = new Date();
@@ -44,8 +58,9 @@ PlasmoidItem {
             return dateObj;
         }
 
+
         function getPrayerName(languageIndex, prayer) {
-            if (languageIndex === 0 || languageIndex === undefined) {
+            if (languageIndex === 0) {
                 return prayer;
             } else {
                 let arabicPrayers = {
@@ -59,6 +74,7 @@ PlasmoidItem {
                 return arabicPrayers[prayer];
             }
         }
+
 
         function findHighlighted(timings) {
             fajr.color = Kirigami.Theme.neutralBackgroundColor;
@@ -114,6 +130,7 @@ PlasmoidItem {
             }
         }
 
+
         function refresh_times() {
             let URL = "https://api.aladhan.com/v1/timingsByCity/timingsByCity?city=" + Plasmoid.configuration.city + "&country=" + Plasmoid.configuration.country + "&method="  + Plasmoid.configuration.method;
             request(URL, (o) => {
@@ -134,6 +151,7 @@ PlasmoidItem {
             });
         }
 
+
         function request(url, callback) {
             let xhr = new XMLHttpRequest();
             xhr.onreadystatechange = (function(myxhr) {
@@ -147,16 +165,12 @@ PlasmoidItem {
             xhr.send();
         }
 
+
         Component.onCompleted: {
             refresh_times();
         }
 
         Item {
-            Component.onCompleted: {  // default initialization to 0 (English)
-                if (plasmoid.configuration.languageIndex === undefined) {
-                    plasmoid.configuration.languageIndex = 0;
-                }
-            }
             Timer {
                 interval: 3.6e+06 // repeating hourly
                 running: true
@@ -173,7 +187,7 @@ PlasmoidItem {
             Label {
                 id: titleLabel
 
-                text: Plasmoid.configuration.languageIndex === 0 ? "Prayer Times" : "مواقيت الصلاة"
+                text: languageIndex === 0 ? "Prayer Times" : "مواقيت الصلاة"
                 font.pixelSize: 24
                 anchors.horizontalCenter: parent.horizontalCenter
             }
@@ -202,15 +216,15 @@ PlasmoidItem {
 
                 RowLayout {
                     anchors.fill: parent
-                    layoutDirection: Plasmoid.configuration.languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
+                    layoutDirection: languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
                     
                     Label {
                         id: fajrTitle
-                        text: getPrayerName(Plasmoid.configuration.languageIndex, "Fajr")
+                        text: getPrayerName(languageIndex, "Fajr")
                         Layout.alignment: Qt.AlignLeft
                         font.pixelSize: 20
-                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
-                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
+                        leftPadding: languageIndex === 0 ? 5 : 0
+                        rightPadding: languageIndex === 0 ? 0 : 5
                     }
 
                     Label {
@@ -220,8 +234,8 @@ PlasmoidItem {
                         Layout.alignment: Qt.AlignRight
                         color: Kirigami.Theme.textColor;
                         font.pixelSize: 20
-                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
-                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
+                        leftPadding: languageIndex === 0 ? 0 : 5
+                        rightPadding: languageIndex === 0 ? 5 : 0
                     }
                 }
 
@@ -247,15 +261,15 @@ PlasmoidItem {
 
                 RowLayout {
                     anchors.fill: parent
-                    layoutDirection: Plasmoid.configuration.languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
+                    layoutDirection: languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
                     
                     Label {
                         id: sunriseTitle
-                        text: getPrayerName(Plasmoid.configuration.languageIndex, "Sunrise")
+                        text: getPrayerName(languageIndex, "Sunrise")
                         Layout.alignment: Qt.AlignLeft
                         font.pixelSize: 20
-                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
-                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
+                        leftPadding: languageIndex === 0 ? 5 : 0
+                        rightPadding: languageIndex === 0 ? 0 : 5
                         
                     }
 
@@ -266,8 +280,8 @@ PlasmoidItem {
                         Layout.alignment: Qt.AlignRight
                         color: Kirigami.Theme.textColor;
                         font.pixelSize: 20
-                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
-                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
+                        leftPadding: languageIndex === 0 ? 0 : 5
+                        rightPadding: languageIndex === 0 ? 5 : 0
                     }
                 }
 
@@ -293,15 +307,15 @@ PlasmoidItem {
 
                 RowLayout {
                     anchors.fill: parent
-                    layoutDirection: Plasmoid.configuration.languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
+                    layoutDirection: languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
                     
                     Label {
                         id: dhuhrTitle
-                        text: getPrayerName(Plasmoid.configuration.languageIndex, "Dhuhr")
+                        text: getPrayerName(languageIndex, "Dhuhr")
                         Layout.alignment: Qt.AlignLeft
                         font.pixelSize: 20
-                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
-                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
+                        leftPadding: languageIndex === 0 ? 5 : 0
+                        rightPadding: languageIndex === 0 ? 0 : 5
                         
                     }
 
@@ -312,8 +326,8 @@ PlasmoidItem {
                         Layout.alignment: Qt.AlignRight
                         color: Kirigami.Theme.textColor;
                         font.pixelSize: 20
-                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
-                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
+                        leftPadding: languageIndex === 0 ? 0 : 5
+                        rightPadding: languageIndex === 0 ? 5 : 0
                     }
                 }
 
@@ -339,15 +353,15 @@ PlasmoidItem {
 
                 RowLayout {
                     anchors.fill: parent
-                    layoutDirection: Plasmoid.configuration.languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
+                    layoutDirection: languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
                     
                     Label {
                         id: asrTitle
-                        text: getPrayerName(Plasmoid.configuration.languageIndex, "Asr")
+                        text: getPrayerName(languageIndex, "Asr")
                         Layout.alignment: Qt.AlignLeft
                         font.pixelSize: 20
-                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
-                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
+                        leftPadding: languageIndex === 0 ? 5 : 0
+                        rightPadding: languageIndex === 0 ? 0 : 5
                         
                     }
 
@@ -358,8 +372,8 @@ PlasmoidItem {
                         Layout.alignment: Qt.AlignRight
                         color: Kirigami.Theme.textColor;
                         font.pixelSize: 20
-                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
-                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
+                        leftPadding: languageIndex === 0 ? 0 : 5
+                        rightPadding: languageIndex === 0 ? 5 : 0
                     }
                 }
 
@@ -385,15 +399,15 @@ PlasmoidItem {
 
                 RowLayout {
                     anchors.fill: parent
-                    layoutDirection: Plasmoid.configuration.languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
+                    layoutDirection: languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
                     
                     Label {
                         id: maghribTitle
-                        text: getPrayerName(Plasmoid.configuration.languageIndex, "Maghrib")
+                        text: getPrayerName(languageIndex, "Maghrib")
                         Layout.alignment: Qt.AlignLeft
                         font.pixelSize: 20
-                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
-                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
+                        leftPadding: languageIndex === 0 ? 5 : 0
+                        rightPadding: languageIndex === 0 ? 0 : 5
                         
                     }
 
@@ -404,8 +418,8 @@ PlasmoidItem {
                         Layout.alignment: Qt.AlignRight
                         color: Kirigami.Theme.textColor;
                         font.pixelSize: 20
-                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
-                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
+                        leftPadding: languageIndex === 0 ? 0 : 5
+                        rightPadding: languageIndex === 0 ? 5 : 0
                     }
                 }
 
@@ -431,15 +445,15 @@ PlasmoidItem {
 
                 RowLayout {
                     anchors.fill: parent
-                    layoutDirection: Plasmoid.configuration.languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
+                    layoutDirection: languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
                     
                     Label {
                         id: ishaTitle
-                        text: getPrayerName(Plasmoid.configuration.languageIndex, "Isha")
+                        text: getPrayerName(languageIndex, "Isha")
                         Layout.alignment: Qt.AlignLeft
                         font.pixelSize: 20
-                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
-                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
+                        leftPadding: languageIndex === 0 ? 5 : 0
+                        rightPadding: languageIndex === 0 ? 0 : 5
                         
                     }
 
@@ -450,8 +464,8 @@ PlasmoidItem {
                         Layout.alignment: Qt.AlignRight
                         color: Kirigami.Theme.textColor;
                         font.pixelSize: 20
-                        leftPadding: Plasmoid.configuration.languageIndex === 0 ? 0 : 5
-                        rightPadding: Plasmoid.configuration.languageIndex === 0 ? 5 : 0
+                        leftPadding: languageIndex === 0 ? 0 : 5
+                        rightPadding: languageIndex === 0 ? 5 : 0
                     }
                 }
 

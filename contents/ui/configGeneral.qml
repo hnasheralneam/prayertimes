@@ -31,7 +31,7 @@ KCM.SimpleKCM {
           id: languageField
           Kirigami.FormData.label: i18n("Language:")
           model: ["English", "العربية"]
-          currentIndex: 0
+          currentIndex: plasmoid.configuration.languageIndex !== undefined ? plasmoid.configuration.languageIndex : 0
       }
       CheckBox {
           id: hourFormatCheckBox

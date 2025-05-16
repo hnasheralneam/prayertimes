@@ -79,16 +79,4 @@ Kirigami.Icon {
             }
         }
     }
-
-
-    // Label {
-    //     id: title
-    //     text:"hi"
-    //     color: Kirigami.Theme.textColor
-    //     font.pixelSize: Kirigami.Units.iconSizes.small
-    //     elide: Text.ElideRight
-    //     horizontalAlignment: Text.AlignLeft
-    //     verticalAlignment: Text.AlignVCenter
-    //     Layout.fillWidth: true
-    // }
 }

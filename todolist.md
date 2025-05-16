@@ -1,12 +1,11 @@
 add options for
-- school of thought (medhab)
-- calculation method
-- 12 hour time
+- school of thought (medhab) dropdown
 
 fix
 - need to refresh more often for highlighting active prayer
 - should have error when cannot pull successfully (eg no internet)
 - make text color work on highlighted regardless (by checking contrast)
+- alignment of arabic is messed up
 
 features
 - find way to openly cite sources (in panel for config?)

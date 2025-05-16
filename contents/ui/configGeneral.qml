@@ -4,9 +4,9 @@ import org.kde.kirigami 2.5 as Kirigami
 import org.kde.kcmutils as KCM
 
 KCM.SimpleKCM {
-
     property alias cfg_city: cityField.text
     property alias cfg_country: countryField.text
+    property alias cfg_smallStyle: smallStyleField.currentValue
     property alias cfg_hourFormat: hourFormatCheckBox.checked
     property alias cfg_method: methodField.text
     property alias cfg_languageIndex: languageField.currentIndex
@@ -22,6 +22,14 @@ KCM.SimpleKCM {
           Kirigami.FormData.label: i18n("Country:")
           placeholderText: i18n("eg. United States")
       }
+
+      /* ComboBox {
+         id: smallStyleField
+         Kirigami.FormData.label: i18n("Small Style:")
+         model: [i18n("Icon"), i18n("Next time")]
+         Component.onCompleted: {
+            currentIndex = 0;
+         } */
       TextField {
           id: methodField
           Kirigami.FormData.label: i18n("Method:")

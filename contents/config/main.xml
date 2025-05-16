@@ -11,6 +11,12 @@
     <entry name="country" type="String">
       <default>United States</default>
     </entry>
+    <!--<entry name="Small Style" type="Enum">
+      <default>icon</default>
+      <choices>
+        <choice name="icon"/>
+        <choice name="next-time"/>
+      </choices>-->
     <entry name="hourFormat" type="Bool">
       <default>true</default>
     </entry>

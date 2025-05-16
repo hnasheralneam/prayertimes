@@ -6,14 +6,69 @@ import org.kde.plasma.components 3.0 as PlasmaComponents
 import org.kde.plasma.plasmoid 2.0
 
 PlasmoidItem {
-    property bool isSmall: width < (Kirigami.Units.gridUnit * 10) || height < (Kirigami.Units.gridUnit * 10)
+    readonly property bool isSmall: width < (Kirigami.Units.gridUnit * 10) || height < (Kirigami.Units.gridUnit * 10)
+    readonly property bool isVertical: Plasmoid.formFactor === PlasmaCore.Types.Vertical
 
     width: Kirigami.Units.gridUnit * 15
     height: Kirigami.Units.gridUnit * 25
     preferredRepresentation: isSmall ? compactRepresentation : fullRepresentation
 
-    compactRepresentation: CompactRepresentation {
-    }
+
+    compactRepresentation: CompactRepresentation {}
+
+
+    //     Layout.minimumWidth: isVertical ? 0 : compactRow.implicitWidth
+    //     Layout.maximumWidth: isVertical ? Infinity : Layout.minimumWidth
+    //     Layout.preferredWidth: isVertical ? -1 : Layout.minimumWidth
+
+    //     Layout.minimumHeight: isVertical ? label.height : Kirigami.Theme.smallFont.pixelSize
+    //     Layout.maximumHeight: isVertical ? Layout.minimumHeight : Infinity
+    //     Layout.preferredHeight: isVertical ? Layout.minimumHeight : Kirigami.Units.iconSizes.sizeForLabels * 2
+
+    // compactRepresentation: MouseArea {
+    //     id: compactRoot
+
+    //     width: Kirigami.Units.gridUnit * 15
+    //     property bool wasExpanded
+    //     onPressed: wasExpanded = root.expanded
+    //     onClicked: root.expanded = !wasExpanded
+
+    //     Row {
+    //         id: compactRow
+
+    //         anchors.centerIn: parent
+    //         spacing: Kirigami.Units.smallSpacing
+
+    //         Kirigami.Icon {
+    //             id: icon
+
+    //             anchors.verticalCenter: parent.verticalCenter
+    //             height: Layout.minimumHeight
+    //             width: height
+
+    //             source: Plasmoid.icon || "plasma"
+    //             visible: true
+    //         }
+
+    //         Label {
+    //             id: label
+
+    //             width: Kirigami.Units.gridUnit * 15
+    //             height: Layout.minimumHeight
+
+    //             text: "hai there"
+    //             textFormat: Text.PlainText
+    //             horizontalAlignment: Text.AlignHCenter
+    //             verticalAlignment: Text.AlignVCenter
+    //             wrapMode: Text.NoWrap
+    //             fontSizeMode: root.isVertical ? Text.HorizontalFit : Text.VerticalFit
+    //             font.pixelSize: tooSmall ? Kirigami.Theme.defaultFont.pixelSize : Kirigami.Units.iconSizes.roundedIconSize(Kirigami.Units.gridUnit * 2)
+    //             minimumPointSize: Kirigami.Theme.smallFont.pointSize
+    //             visible: true
+    //         }
+    //     }
+    // }
+
 
     fullRepresentation: Column {
         id: prayerClock
@@ -21,12 +76,17 @@ PlasmoidItem {
         function formatTime(date, format) {
             let dateObj = new Date(date);
             let hours, mins;
-            if (dateObj.getHours().toString().length < 2) hours = `0${dateObj.getHours()}`;
-            else hours = `${dateObj.getHours()}`;
-            if (dateObj.getMinutes().toString().length < 2) mins = `0${dateObj.getMinutes()}`;
-            else mins = `${dateObj.getMinutes()}`;
+            if (dateObj.getHours().toString().length < 2)
+                hours = `0${dateObj.getHours()}`;
+            else
+                hours = `${dateObj.getHours()}`;
+            if (dateObj.getMinutes().toString().length < 2)
+                mins = `0${dateObj.getMinutes()}`;
+            else
+                mins = `${dateObj.getMinutes()}`;
             return `${hours}:${mins}`;
         }
+
         function parseTime(timeString) {
             let parts = timeString.split(':');
             let dateObj = new Date();
@@ -37,53 +97,45 @@ PlasmoidItem {
         }
 
         function findHighlighted(timings) {
-            fajr.color = Kirigami.Theme.neutralBackgroundColor;
-            sunrise.color = Kirigami.Theme.neutralBackgroundColor;
-            dhuhr.color = Kirigami.Theme.neutralBackgroundColor;
-            asr.color = Kirigami.Theme.neutralBackgroundColor;
-            maghrib.color = Kirigami.Theme.neutralBackgroundColor;
-            isha.color = Kirigami.Theme.neutralBackgroundColor;
-
+            fajr.color = "transparent";
+            sunrise.color = "transparent";
+            dhuhr.color = "transparent";
+            asr.color = "transparent";
+            maghrib.color = "transparent";
+            isha.color = "transparent";
             fajrTitle.color = Kirigami.Theme.textColor;
             sunriseTitle.color = Kirigami.Theme.textColor;
             dhuhrTitle.color = Kirigami.Theme.textColor;
             asrTitle.color = Kirigami.Theme.textColor;
             maghribTitle.color = Kirigami.Theme.textColor;
             ishaTitle.color = Kirigami.Theme.textColor;
-
             fajrTime.color = Kirigami.Theme.textColor;
             sunriseTime.color = Kirigami.Theme.textColor;
             dhuhrTime.color = Kirigami.Theme.textColor;
             asrTime.color = Kirigami.Theme.textColor;
             maghribTime.color = Kirigami.Theme.textColor;
             ishaTime.color = Kirigami.Theme.textColor;
-
             if (Date.now() > parseTime(timings.Isha)) {
                 isha.color = Kirigami.Theme.highlightColor;
                 ishaTitle.color = Kirigami.Theme.neutralBackgroundColor;
                 ishaTime.color = Kirigami.Theme.neutralBackgroundColor;
-            }
-            else if (Date.now() > parseTime(timings.Maghrib)) {
+            } else if (Date.now() > parseTime(timings.Maghrib)) {
                 maghrib.color = Kirigami.Theme.highlightColor;
                 maghribTitle.color = Kirigami.Theme.neutralBackgroundColor;
                 maghribTime.color = Kirigami.Theme.neutralBackgroundColor;
-            }
-            else if (Date.now() > parseTime(timings.Asr)) {
+            } else if (Date.now() > parseTime(timings.Asr)) {
                 asr.color = Kirigami.Theme.highlightColor;
                 asrTitle.color = Kirigami.Theme.neutralBackgroundColor;
                 asrTime.color = Kirigami.Theme.neutralBackgroundColor;
-            }
-            else if (Date.now() > parseTime(timings.Dhuhr)) {
+            } else if (Date.now() > parseTime(timings.Dhuhr)) {
                 dhuhr.color = Kirigami.Theme.highlightColor;
                 dhuhrTitle.color = Kirigami.Theme.neutralBackgroundColor;
                 dhuhrTime.color = Kirigami.Theme.neutralBackgroundColor;
-            }
-            else if (Date.now() > parseTime(timings.Sunrise)) {
+            } else if (Date.now() > parseTime(timings.Sunrise)) {
                 sunrise.color = Kirigami.Theme.highlightColor;
                 sunriseTitle.color = Kirigami.Theme.neutralBackgroundColor;
                 sunriseTime.color = Kirigami.Theme.neutralBackgroundColor;
-            }
-            else if (Date.now() > parseTime(timings.Fajr)) {
+            } else if (Date.now() > parseTime(timings.Fajr)) {
                 fajr.color = Kirigami.Theme.highlightColor;
                 fajrTitle.color = Kirigami.Theme.neutralBackgroundColor;
                 fajrTime.color = Kirigami.Theme.neutralBackgroundColor;
@@ -95,10 +147,7 @@ PlasmoidItem {
             request(URL, (o) => {
                 if (o.status === 200) {
                     let data = JSON.parse(o.responseText).data;
-
                     findHighlighted(data.timings);
-
-
                     fajrTime.text = data.timings.Fajr;
                     sunriseTime.text = data.timings.Sunrise;
                     dhuhrTime.text = data.timings.Dhuhr;
@@ -130,7 +179,7 @@ PlasmoidItem {
 
         Item {
             Timer {
-                interval: 3.6e+06 // repeating hourly
+                interval: 300000 // repeat every 5 minutes
                 running: true
                 repeat: true
                 onTriggered: refresh_times()
@@ -148,7 +197,7 @@ PlasmoidItem {
             Label {
                 id: titleLabel
 
-                text: "Prayer Times"
+                text: i18n("Prayer Times")
                 font.pixelSize: 24
                 anchors.horizontalCenter: parent.horizontalCenter
             }
@@ -166,8 +215,6 @@ PlasmoidItem {
                 bottomPadding: 10
             }
 
-
-     
             Rectangle {
                 id: fajr
 
@@ -179,11 +226,13 @@ PlasmoidItem {
                 Text {
                     id: fajrTitle
 
+                    anchors.left: parent.left
                     fontSizeMode: Text.Fit
-                    text: "Fajr"
+                    text: i18n("Fajr")
                     color: Kirigami.Theme.neutralBackgroundColor
                     font.pixelSize: 20
-                    leftPadding: 5
+                    rightPadding: Kirigami.Units.gridUnit * .25
+                    leftPadding: Kirigami.Units.gridUnit * .25
                 }
 
                 Text {
@@ -193,7 +242,8 @@ PlasmoidItem {
                     text: "00:00"
                     color: Kirigami.Theme.neutralBackgroundColor
                     font.pixelSize: 20
-                    rightPadding: 5
+                    rightPadding: Kirigami.Units.gridUnit * .25
+                    leftPadding: Kirigami.Units.gridUnit * .25
                 }
 
             }
@@ -205,6 +255,7 @@ PlasmoidItem {
                 contentItem: Rectangle {
                     implicitHeight: 1
                     color: Kirigami.Theme.disabledTextColor
+                    opacity: 0.2
                 }
 
             }
@@ -220,11 +271,13 @@ PlasmoidItem {
                 Text {
                     id: sunriseTitle
 
+                    anchors.left: parent.left
                     fontSizeMode: Text.Fit
-                    text: "Sunrise"
+                    text: i18n("Sunrise")
                     color: Kirigami.Theme.textColor
                     font.pixelSize: 20
-                    leftPadding: 5
+                    rightPadding: Kirigami.Units.gridUnit * .25
+                    leftPadding: Kirigami.Units.gridUnit * .25
                 }
 
                 Text {
@@ -234,7 +287,8 @@ PlasmoidItem {
                     text: "00:00"
                     color: Kirigami.Theme.textColor
                     font.pixelSize: 20
-                    rightPadding: 5
+                    rightPadding: Kirigami.Units.gridUnit * .25
+                    leftPadding: Kirigami.Units.gridUnit * .25
                 }
 
             }
@@ -246,6 +300,7 @@ PlasmoidItem {
                 contentItem: Rectangle {
                     implicitHeight: 1
                     color: Kirigami.Theme.disabledTextColor
+                    opacity: 0.2
                 }
 
             }
@@ -261,11 +316,13 @@ PlasmoidItem {
                 Text {
                     id: dhuhrTitle
 
+                    anchors.left: parent.left
                     fontSizeMode: Text.Fit
-                    text: "Dhuhr"
+                    text: i18n("Dhuhr")
                     color: Kirigami.Theme.textColor
                     font.pixelSize: 20
-                    leftPadding: 5
+                    rightPadding: Kirigami.Units.gridUnit * .25
+                    leftPadding: Kirigami.Units.gridUnit * .25
                 }
 
                 Text {
@@ -275,7 +332,8 @@ PlasmoidItem {
                     text: "00:00"
                     color: Kirigami.Theme.textColor
                     font.pixelSize: 20
-                    rightPadding: 5
+                    rightPadding: Kirigami.Units.gridUnit * .25
+                    leftPadding: Kirigami.Units.gridUnit * .25
                 }
 
             }
@@ -287,6 +345,7 @@ PlasmoidItem {
                 contentItem: Rectangle {
                     implicitHeight: 1
                     color: Kirigami.Theme.disabledTextColor
+                    opacity: 0.2
                 }
 
             }
@@ -302,11 +361,13 @@ PlasmoidItem {
                 Text {
                     id: asrTitle
 
+                    anchors.left: parent.left
                     fontSizeMode: Text.Fit
-                    text: "Asr"
+                    text: i18n("Asr")
                     color: Kirigami.Theme.textColor
                     font.pixelSize: 20
-                    leftPadding: 5
+                    rightPadding: Kirigami.Units.gridUnit * .25
+                    leftPadding: Kirigami.Units.gridUnit * .25
                 }
 
                 Text {
@@ -316,7 +377,8 @@ PlasmoidItem {
                     text: "00:00"
                     color: Kirigami.Theme.textColor
                     font.pixelSize: 20
-                    rightPadding: 5
+                    rightPadding: Kirigami.Units.gridUnit * .25
+                    leftPadding: Kirigami.Units.gridUnit * .25
                 }
 
             }
@@ -328,6 +390,7 @@ PlasmoidItem {
                 contentItem: Rectangle {
                     implicitHeight: 1
                     color: Kirigami.Theme.disabledTextColor
+                    opacity: 0.2
                 }
 
             }
@@ -343,11 +406,13 @@ PlasmoidItem {
                 Text {
                     id: maghribTitle
 
+                    anchors.left: parent.left
                     fontSizeMode: Text.Fit
-                    text: "Maghrib"
+                    text: i18n("Maghrib")
                     color: Kirigami.Theme.textColor
                     font.pixelSize: 20
-                    leftPadding: 5
+                    rightPadding: Kirigami.Units.gridUnit * .25
+                    leftPadding: Kirigami.Units.gridUnit * .25
                 }
 
                 Text {
@@ -357,7 +422,8 @@ PlasmoidItem {
                     text: "00:00"
                     color: Kirigami.Theme.textColor
                     font.pixelSize: 20
-                    rightPadding: 5
+                    rightPadding: Kirigami.Units.gridUnit * .25
+                    leftPadding: Kirigami.Units.gridUnit * .25
                 }
 
             }
@@ -369,6 +435,7 @@ PlasmoidItem {
                 contentItem: Rectangle {
                     implicitHeight: 1
                     color: Kirigami.Theme.disabledTextColor
+                    opacity: 0.2
                 }
 
             }
@@ -384,11 +451,13 @@ PlasmoidItem {
                 Text {
                     id: ishaTitle
 
+                    anchors.left: parent.left
                     fontSizeMode: Text.Fit
-                    text: "Isha"
+                    text: i18n("Isha")
                     color: Kirigami.Theme.textColor
                     font.pixelSize: 20
-                    leftPadding: 5
+                    rightPadding: Kirigami.Units.gridUnit * .25
+                    leftPadding: Kirigami.Units.gridUnit * .25
                 }
 
                 Text {
@@ -398,7 +467,8 @@ PlasmoidItem {
                     text: "00:00"
                     color: Kirigami.Theme.textColor
                     font.pixelSize: 20
-                    rightPadding: 5
+                    rightPadding: Kirigami.Units.gridUnit * .25
+                    leftPadding: Kirigami.Units.gridUnit * .25
                 }
 
             }
@@ -409,10 +479,11 @@ PlasmoidItem {
             }
 
             Button {
-                text: "Refresh times"
+                text: i18n("Refresh times")
                 anchors.horizontalCenter: parent.horizontalCenter
                 onClicked: refresh_times()
             }
+
         }
 
     }

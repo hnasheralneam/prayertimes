@@ -7,5 +7,8 @@ This is a simple prayer times widget for KDE Plasma 6. The API call code is from
 
 
 ## Development
-Use `plasmoidviewer -a .` to open at default size in a new window.  
+Use `plasmoidviewer -a .` to open at default size in a new window.
 Use `killall plasmashell && kstart plasmashell` to... umm... "refresh" your desktop and the widgets on it.
+
+*Translations*
+After updating any text with i18n(), update the .pot file with `./Messages.sh`, then update the .po files, then compile the translations with `msgfmt po/ar.po -o ~/.local/share/locale/ar/LC_MESSAGES/plasma_applet_dev.hnasheralneam.prayertimes.mo`

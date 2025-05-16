@@ -5,14 +5,21 @@
    <kcfgfile name="" />
 
    <group name="General">
-      <entry name="city" type="String">
+    <entry name="city" type="String">
       <default>New York</default>
     </entry>
     <entry name="country" type="String">
       <default>United States</default>
     </entry>
+    <entry name="hourFormat" type="Bool">
+      <default>true</default>
+    </entry>
+    <entry name="languageIndex" type="Int">
+      <default>0</default>
+    </entry>
+    <entry name="method" type="String">
+    </entry>
    </group>
-
 
    <group name="About">
       <entry name="author" type="String">

@@ -6,16 +6,13 @@ import org.kde.plasma.components 3.0 as PlasmaComponents
 import org.kde.plasma.plasmoid 2.0
 
 PlasmoidItem {
-    readonly property bool isSmall: width < (Kirigami.Units.gridUnit * 10) || height < (Kirigami.Units.gridUnit * 10)
     readonly property bool isVertical: Plasmoid.formFactor === PlasmaCore.Types.Vertical
+    property bool isSmall: width < (Kirigami.Units.gridUnit * 10) || height < (Kirigami.Units.gridUnit * 10)
+    property int languageIndex: Plasmoid.configuration.languageIndex !== undefined ? Plasmoid.configuration.languageIndex : 0
 
     width: Kirigami.Units.gridUnit * 15
     height: Kirigami.Units.gridUnit * 25
     preferredRepresentation: isSmall ? compactRepresentation : fullRepresentation
-
-
-    compactRepresentation: CompactRepresentation {}
-
 
     //     Layout.minimumWidth: isVertical ? 0 : compactRow.implicitWidth
     //     Layout.maximumWidth: isVertical ? Infinity : Layout.minimumWidth
@@ -69,23 +66,40 @@ PlasmoidItem {
     //     }
     // }
 
+    Connections {
+        target: Plasmoid
+        onConfigurationChanged: {
+            languageUpdate();  // Update language when configuration is altered
+        }
+    }
+    compactRepresentation: CompactRepresentation {
+    }
 
     fullRepresentation: Column {
         id: prayerClock
-
-        function formatTime(date, format) {
-            let dateObj = new Date(date);
-            let hours, mins;
-            if (dateObj.getHours().toString().length < 2)
-                hours = `0${dateObj.getHours()}`;
-            else
-                hours = `${dateObj.getHours()}`;
-            if (dateObj.getMinutes().toString().length < 2)
-                mins = `0${dateObj.getMinutes()}`;
-            else
-                mins = `${dateObj.getMinutes()}`;
-            return `${hours}:${mins}`;
+        
+        function languageUpdate() {
+            languageIndex = Plasmoid.configuration.languageIndex; // change language
         }
+
+
+        function to12HourTime(timeString, isActive) {
+            if (isActive) {  // if checkbox is active, convert to 12-hour format
+                let parts = timeString.split(':');
+                let hours =  parseInt(parts[0], 10);
+                let minutes = parseInt(parts[1], 10);
+                let period = hours >= 12 ? "PM" : "AM";
+                hours = hours % 12 || 12;
+                if (minutes > 9) {
+                    return `${hours}:${minutes} ${period}`;
+                } else {
+                    return `${hours}:0${minutes} ${period}`;
+                }
+            } else {  // no change
+                return timeString;
+            }
+        }
+
 
         function parseTime(timeString) {
             let parts = timeString.split(':');
@@ -95,6 +109,24 @@ PlasmoidItem {
             dateObj.setSeconds(0);
             return dateObj;
         }
+
+
+        function getPrayerName(languageIndex, prayer) {
+            if (languageIndex === 0) {
+                return prayer;
+            } else {
+                let arabicPrayers = {
+                    "Fajr": "الفجر",
+                    "Sunrise": "الشروق",
+                    "Dhuhr": "الظهر",
+                    "Asr": "العصر",
+                    "Maghrib": "المغرب",
+                    "Isha": "العشاء"
+                }
+                return arabicPrayers[prayer];
+            }
+        }
+
 
         function findHighlighted(timings) {
             fajr.color = "transparent";
@@ -116,6 +148,11 @@ PlasmoidItem {
             maghribTime.color = Kirigami.Theme.textColor;
             ishaTime.color = Kirigami.Theme.textColor;
             if (Date.now() > parseTime(timings.Isha)) {
+                fajr.color = Kirigami.Theme.highlightColor;
+                fajrTitle.color = Kirigami.Theme.neutralBackgroundColor;
+                fajrTime.color = Kirigami.Theme.neutralBackgroundColor;
+            }
+            else if (Date.now() > parseTime(timings.Maghrib)) {
                 isha.color = Kirigami.Theme.highlightColor;
                 ishaTitle.color = Kirigami.Theme.neutralBackgroundColor;
                 ishaTime.color = Kirigami.Theme.neutralBackgroundColor;
@@ -142,23 +179,27 @@ PlasmoidItem {
             }
         }
 
+
         function refresh_times() {
-            let URL = "http://api.aladhan.com/v1/timingsByCity?city=" + Plasmoid.configuration.city + "&country=" + Plasmoid.configuration.country + "&method=2";
+            let URL = "https://api.aladhan.com/v1/timingsByCity/timingsByCity?city=" + Plasmoid.configuration.city + "&country=" + Plasmoid.configuration.country + "&method="  + Plasmoid.configuration.method;
             request(URL, (o) => {
                 if (o.status === 200) {
                     let data = JSON.parse(o.responseText).data;
                     findHighlighted(data.timings);
-                    fajrTime.text = data.timings.Fajr;
-                    sunriseTime.text = data.timings.Sunrise;
-                    dhuhrTime.text = data.timings.Dhuhr;
-                    asrTime.text = data.timings.Asr;
-                    maghribTime.text = data.timings.Maghrib;
-                    ishaTime.text = data.timings.Isha;
+
+                    let isActive = Plasmoid.configuration.hourFormat;
+                    fajrTime.text = to12HourTime(data.timings.Fajr, isActive);
+                    sunriseTime.text = to12HourTime(data.timings.Sunrise, isActive);
+                    dhuhrTime.text = to12HourTime(data.timings.Dhuhr, isActive);
+                    asrTime.text = to12HourTime(data.timings.Asr, isActive);
+                    maghribTime.text = to12HourTime(data.timings.Maghrib, isActive);
+                    ishaTime.text = to12HourTime(data.timings.Isha, isActive);
                 } else {
                     console.log("Some error has occurred");
                 }
             });
         }
+
 
         function request(url, callback) {
             let xhr = new XMLHttpRequest();
@@ -172,6 +213,7 @@ PlasmoidItem {
             xhr.open("GET", url);
             xhr.send();
         }
+
 
         Component.onCompleted: {
             refresh_times();
@@ -188,16 +230,13 @@ PlasmoidItem {
         }
 
         Column {
-            // PrayerTimeBlock {
-            //     prayer: "Fajr"
-            // }
-
+            width: parent.width * 5 / 6
             anchors.horizontalCenter: parent.horizontalCenter
 
             Label {
                 id: titleLabel
 
-                text: i18n("Prayer Times")
+                text: languageIndex === 0 ? "Prayer Times" : "مواقيت الصلاة"
                 font.pixelSize: 24
                 anchors.horizontalCenter: parent.horizontalCenter
             }
@@ -217,33 +256,34 @@ PlasmoidItem {
 
             Rectangle {
                 id: fajr
-
                 width: parent.width
-                color: Kirigami.Theme.highlightColor
+                color: Kirigami.Theme.neutralBackgroundColor
                 height: 28
                 radius: 8
 
-                Text {
-                    id: fajrTitle
+                RowLayout {
+                    anchors.fill: parent
+                    layoutDirection: languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
+                    
+                    Label {
+                        id: fajrTitle
+                        text: getPrayerName(languageIndex, "Fajr")
+                        Layout.alignment: Qt.AlignLeft
+                        font.pixelSize: 20
+                        leftPadding: languageIndex === 0 ? 5 : 0
+                        rightPadding: languageIndex === 0 ? 0 : 5
+                    }
 
-                    anchors.left: parent.left
-                    fontSizeMode: Text.Fit
-                    text: i18n("Fajr")
-                    color: Kirigami.Theme.neutralBackgroundColor
-                    font.pixelSize: 20
-                    rightPadding: Kirigami.Units.gridUnit * .25
-                    leftPadding: Kirigami.Units.gridUnit * .25
-                }
+                    Label {
+                        id: fajrTime
 
-                Text {
-                    id: fajrTime
-
-                    anchors.right: parent.right
-                    text: "00:00"
-                    color: Kirigami.Theme.neutralBackgroundColor
-                    font.pixelSize: 20
-                    rightPadding: Kirigami.Units.gridUnit * .25
-                    leftPadding: Kirigami.Units.gridUnit * .25
+                        text: "00:00"
+                        Layout.alignment: Qt.AlignRight
+                        color: Kirigami.Theme.textColor;
+                        font.pixelSize: 20
+                        leftPadding: languageIndex === 0 ? 0 : 5
+                        rightPadding: languageIndex === 0 ? 5 : 0
+                    }
                 }
 
             }
@@ -262,33 +302,35 @@ PlasmoidItem {
 
             Rectangle {
                 id: sunrise
-
                 width: parent.width
                 color: Kirigami.Theme.neutralBackgroundColor
                 height: 28
                 radius: 8
 
-                Text {
-                    id: sunriseTitle
+                RowLayout {
+                    anchors.fill: parent
+                    layoutDirection: languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
+                    
+                    Label {
+                        id: sunriseTitle
+                        text: getPrayerName(languageIndex, "Sunrise")
+                        Layout.alignment: Qt.AlignLeft
+                        font.pixelSize: 20
+                        leftPadding: languageIndex === 0 ? 5 : 0
+                        rightPadding: languageIndex === 0 ? 0 : 5
+                        
+                    }
 
-                    anchors.left: parent.left
-                    fontSizeMode: Text.Fit
-                    text: i18n("Sunrise")
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    rightPadding: Kirigami.Units.gridUnit * .25
-                    leftPadding: Kirigami.Units.gridUnit * .25
-                }
+                    Label {
+                        id: sunriseTime
 
-                Text {
-                    id: sunriseTime
-
-                    anchors.right: parent.right
-                    text: "00:00"
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    rightPadding: Kirigami.Units.gridUnit * .25
-                    leftPadding: Kirigami.Units.gridUnit * .25
+                        text: "00:00"
+                        Layout.alignment: Qt.AlignRight
+                        color: Kirigami.Theme.textColor;
+                        font.pixelSize: 20
+                        leftPadding: languageIndex === 0 ? 0 : 5
+                        rightPadding: languageIndex === 0 ? 5 : 0
+                    }
                 }
 
             }
@@ -307,33 +349,35 @@ PlasmoidItem {
 
             Rectangle {
                 id: dhuhr
-
                 width: parent.width
                 color: Kirigami.Theme.neutralBackgroundColor
                 height: 28
                 radius: 8
 
-                Text {
-                    id: dhuhrTitle
+                RowLayout {
+                    anchors.fill: parent
+                    layoutDirection: languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
+                    
+                    Label {
+                        id: dhuhrTitle
+                        text: getPrayerName(languageIndex, "Dhuhr")
+                        Layout.alignment: Qt.AlignLeft
+                        font.pixelSize: 20
+                        leftPadding: languageIndex === 0 ? 5 : 0
+                        rightPadding: languageIndex === 0 ? 0 : 5
+                        
+                    }
 
-                    anchors.left: parent.left
-                    fontSizeMode: Text.Fit
-                    text: i18n("Dhuhr")
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    rightPadding: Kirigami.Units.gridUnit * .25
-                    leftPadding: Kirigami.Units.gridUnit * .25
-                }
+                    Label {
+                        id: dhuhrTime
 
-                Text {
-                    id: dhuhrTime
-
-                    anchors.right: parent.right
-                    text: "00:00"
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    rightPadding: Kirigami.Units.gridUnit * .25
-                    leftPadding: Kirigami.Units.gridUnit * .25
+                        text: "00:00"
+                        Layout.alignment: Qt.AlignRight
+                        color: Kirigami.Theme.textColor;
+                        font.pixelSize: 20
+                        leftPadding: languageIndex === 0 ? 0 : 5
+                        rightPadding: languageIndex === 0 ? 5 : 0
+                    }
                 }
 
             }
@@ -352,33 +396,35 @@ PlasmoidItem {
 
             Rectangle {
                 id: asr
-
                 width: parent.width
                 color: Kirigami.Theme.neutralBackgroundColor
                 height: 28
                 radius: 8
 
-                Text {
-                    id: asrTitle
+                RowLayout {
+                    anchors.fill: parent
+                    layoutDirection: languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
+                    
+                    Label {
+                        id: asrTitle
+                        text: getPrayerName(languageIndex, "Asr")
+                        Layout.alignment: Qt.AlignLeft
+                        font.pixelSize: 20
+                        leftPadding: languageIndex === 0 ? 5 : 0
+                        rightPadding: languageIndex === 0 ? 0 : 5
+                        
+                    }
 
-                    anchors.left: parent.left
-                    fontSizeMode: Text.Fit
-                    text: i18n("Asr")
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    rightPadding: Kirigami.Units.gridUnit * .25
-                    leftPadding: Kirigami.Units.gridUnit * .25
-                }
+                    Label {
+                        id: asrTime
 
-                Text {
-                    id: asrTime
-
-                    anchors.right: parent.right
-                    text: "00:00"
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    rightPadding: Kirigami.Units.gridUnit * .25
-                    leftPadding: Kirigami.Units.gridUnit * .25
+                        text: "00:00"
+                        Layout.alignment: Qt.AlignRight
+                        color: Kirigami.Theme.textColor;
+                        font.pixelSize: 20
+                        leftPadding: languageIndex === 0 ? 0 : 5
+                        rightPadding: languageIndex === 0 ? 5 : 0
+                    }
                 }
 
             }
@@ -397,33 +443,35 @@ PlasmoidItem {
 
             Rectangle {
                 id: maghrib
-
                 width: parent.width
                 color: Kirigami.Theme.neutralBackgroundColor
                 height: 28
                 radius: 8
 
-                Text {
-                    id: maghribTitle
+                RowLayout {
+                    anchors.fill: parent
+                    layoutDirection: languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
+                    
+                    Label {
+                        id: maghribTitle
+                        text: getPrayerName(languageIndex, "Maghrib")
+                        Layout.alignment: Qt.AlignLeft
+                        font.pixelSize: 20
+                        leftPadding: languageIndex === 0 ? 5 : 0
+                        rightPadding: languageIndex === 0 ? 0 : 5
+                        
+                    }
 
-                    anchors.left: parent.left
-                    fontSizeMode: Text.Fit
-                    text: i18n("Maghrib")
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    rightPadding: Kirigami.Units.gridUnit * .25
-                    leftPadding: Kirigami.Units.gridUnit * .25
-                }
+                    Label {
+                        id: maghribTime
 
-                Text {
-                    id: maghribTime
-
-                    anchors.right: parent.right
-                    text: "00:00"
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    rightPadding: Kirigami.Units.gridUnit * .25
-                    leftPadding: Kirigami.Units.gridUnit * .25
+                        text: "00:00"
+                        Layout.alignment: Qt.AlignRight
+                        color: Kirigami.Theme.textColor;
+                        font.pixelSize: 20
+                        leftPadding: languageIndex === 0 ? 0 : 5
+                        rightPadding: languageIndex === 0 ? 5 : 0
+                    }
                 }
 
             }
@@ -442,33 +490,35 @@ PlasmoidItem {
 
             Rectangle {
                 id: isha
-
                 width: parent.width
                 color: Kirigami.Theme.neutralBackgroundColor
                 height: 28
                 radius: 8
 
-                Text {
-                    id: ishaTitle
+                RowLayout {
+                    anchors.fill: parent
+                    layoutDirection: languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
+                    
+                    Label {
+                        id: ishaTitle
+                        text: getPrayerName(languageIndex, "Isha")
+                        Layout.alignment: Qt.AlignLeft
+                        font.pixelSize: 20
+                        leftPadding: languageIndex === 0 ? 5 : 0
+                        rightPadding: languageIndex === 0 ? 0 : 5
+                        
+                    }
 
-                    anchors.left: parent.left
-                    fontSizeMode: Text.Fit
-                    text: i18n("Isha")
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    rightPadding: Kirigami.Units.gridUnit * .25
-                    leftPadding: Kirigami.Units.gridUnit * .25
-                }
+                    Label {
+                        id: ishaTime
 
-                Text {
-                    id: ishaTime
-
-                    anchors.right: parent.right
-                    text: "00:00"
-                    color: Kirigami.Theme.textColor
-                    font.pixelSize: 20
-                    rightPadding: Kirigami.Units.gridUnit * .25
-                    leftPadding: Kirigami.Units.gridUnit * .25
+                        text: "00:00"
+                        Layout.alignment: Qt.AlignRight
+                        color: Kirigami.Theme.textColor;
+                        font.pixelSize: 20
+                        leftPadding: languageIndex === 0 ? 0 : 5
+                        rightPadding: languageIndex === 0 ? 5 : 0
+                    }
                 }
 
             }
@@ -485,7 +535,5 @@ PlasmoidItem {
             }
 
         }
-
     }
-
 }

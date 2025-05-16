@@ -8,7 +8,7 @@
                 "Name[ar]": "حمزة ناشر النعم"
             }
         ],
-        "BugReportUrl": "https://github.com/hnasheralneam/prayertimes/issues",
+        "BugReportUrl": "https://github.com/hnasheralneam/prayertimeswidget/issues",
         "Category": "Date and Time",
         "Description": "Prayer times clock on your desktop",
         "Description[ar]": "ساعة الصلاة على مكتبك",
@@ -19,11 +19,11 @@
             "desktop"
         ],
         "Icon": "player-time",
-        "Id": "dev.hnasheralneam.prayertimes",
+        "Id": "com.github.hnasheralneam.prayertimeswidget",
         "License": "GPL-3.0+",
         "Name": "Prayer times",
         "Name[ar]": "ساعة الصلاة",
-        "Website": "https://github.com/hnasheralneam/prayertimes"
+        "Website": "https://github.com/hnasheralneam/prayertimeswidget"
     },
     "X-Plasma-API-Minimum-Version": "6.0"
 }

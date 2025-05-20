@@ -9,6 +9,7 @@ KCM.SimpleKCM {
     // property alias cfg_smallStyle: smallStyleField.currentValue
     property alias cfg_hourFormat: hourFormatCheckBox.checked
     property alias cfg_method: methodField.text
+    property alias cfg_school: schoolField.currentIndex
     property alias cfg_languageIndex: languageField.currentIndex
 
     Kirigami.FormLayout {
@@ -40,6 +41,12 @@ KCM.SimpleKCM {
           Kirigami.FormData.label: i18n("Language:")
           model: ["English", "العربية"]
           currentIndex: plasmoid.configuration.languageIndex !== undefined ? plasmoid.configuration.languageIndex : 0
+      }
+      ComboBox {
+          id: schoolField
+          Kirigami.FormData.label: i18n("School:")
+          model: ["Shafi (standard)", "Hanafi"]
+          currentIndex: plasmoid.configuration.school !== undefined ? plasmoid.configuration.school : 0
       }
       CheckBox {
           id: hourFormatCheckBox

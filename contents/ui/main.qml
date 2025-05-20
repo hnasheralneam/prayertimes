@@ -11,7 +11,7 @@ PlasmoidItem {
     property int languageIndex: Plasmoid.configuration.languageIndex !== undefined ? Plasmoid.configuration.languageIndex : 0
 
     width: Kirigami.Units.gridUnit * 15
-    height: Kirigami.Units.gridUnit * 25
+    height: Kirigami.Units.gridUnit * 22
     preferredRepresentation: isSmall ? compactRepresentation : fullRepresentation
 
     //     Layout.minimumWidth: isVertical ? 0 : compactRow.implicitWidth
@@ -77,7 +77,7 @@ PlasmoidItem {
 
     fullRepresentation: Column {
         id: prayerClock
-        
+
         function languageUpdate() {
             languageIndex = Plasmoid.configuration.languageIndex; // change language
         }
@@ -181,7 +181,7 @@ PlasmoidItem {
 
 
         function refresh_times() {
-            let URL = "https://api.aladhan.com/v1/timingsByCity/timingsByCity?city=" + Plasmoid.configuration.city + "&country=" + Plasmoid.configuration.country + "&method="  + Plasmoid.configuration.method;
+            let URL = "https://api.aladhan.com/v1/timingsByCity/timingsByCity?city=" + Plasmoid.configuration.city + "&country=" + Plasmoid.configuration.country + "&method="  + Plasmoid.configuration.method + "&school=" + Plasmoid.configuration.school;
             request(URL, (o) => {
                 if (o.status === 200) {
                     let data = JSON.parse(o.responseText).data;
@@ -264,7 +264,7 @@ PlasmoidItem {
                 RowLayout {
                     anchors.fill: parent
                     layoutDirection: languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
-                    
+
                     Label {
                         id: fajrTitle
                         text: getPrayerName(languageIndex, "Fajr")
@@ -310,7 +310,7 @@ PlasmoidItem {
                 RowLayout {
                     anchors.fill: parent
                     layoutDirection: languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
-                    
+
                     Label {
                         id: sunriseTitle
                         text: getPrayerName(languageIndex, "Sunrise")
@@ -318,7 +318,7 @@ PlasmoidItem {
                         font.pixelSize: 20
                         leftPadding: languageIndex === 0 ? 5 : 0
                         rightPadding: languageIndex === 0 ? 0 : 5
-                        
+
                     }
 
                     Label {
@@ -357,7 +357,7 @@ PlasmoidItem {
                 RowLayout {
                     anchors.fill: parent
                     layoutDirection: languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
-                    
+
                     Label {
                         id: dhuhrTitle
                         text: getPrayerName(languageIndex, "Dhuhr")
@@ -365,7 +365,7 @@ PlasmoidItem {
                         font.pixelSize: 20
                         leftPadding: languageIndex === 0 ? 5 : 0
                         rightPadding: languageIndex === 0 ? 0 : 5
-                        
+
                     }
 
                     Label {
@@ -404,7 +404,7 @@ PlasmoidItem {
                 RowLayout {
                     anchors.fill: parent
                     layoutDirection: languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
-                    
+
                     Label {
                         id: asrTitle
                         text: getPrayerName(languageIndex, "Asr")
@@ -412,7 +412,7 @@ PlasmoidItem {
                         font.pixelSize: 20
                         leftPadding: languageIndex === 0 ? 5 : 0
                         rightPadding: languageIndex === 0 ? 0 : 5
-                        
+
                     }
 
                     Label {
@@ -451,7 +451,7 @@ PlasmoidItem {
                 RowLayout {
                     anchors.fill: parent
                     layoutDirection: languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
-                    
+
                     Label {
                         id: maghribTitle
                         text: getPrayerName(languageIndex, "Maghrib")
@@ -459,7 +459,7 @@ PlasmoidItem {
                         font.pixelSize: 20
                         leftPadding: languageIndex === 0 ? 5 : 0
                         rightPadding: languageIndex === 0 ? 0 : 5
-                        
+
                     }
 
                     Label {
@@ -498,7 +498,7 @@ PlasmoidItem {
                 RowLayout {
                     anchors.fill: parent
                     layoutDirection: languageIndex === 0 ? Qt.LeftToRight : Qt.RightToLeft
-                    
+
                     Label {
                         id: ishaTitle
                         text: getPrayerName(languageIndex, "Isha")
@@ -506,7 +506,7 @@ PlasmoidItem {
                         font.pixelSize: 20
                         leftPadding: languageIndex === 0 ? 5 : 0
                         rightPadding: languageIndex === 0 ? 0 : 5
-                        
+
                     }
 
                     Label {

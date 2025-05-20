@@ -15,13 +15,3 @@ features
 make a build script
 - remove git files, readme, other repo stuff
 - zip to plasmoid
-example, untested:
-```bash
-echo "Run this from project root"
-cp -r ../dev.hnasheralneam.prayertimes ../prayertimesbuild
-cd ../prayertimesbuild
-rm -rf .git
-rm -rf *.md
-cd ..
-zip -r prayertimes.plasmoid prayertimesbuild
-```

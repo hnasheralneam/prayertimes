@@ -1,12 +1,14 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.1
+import QtQuick.LocalStorage
 import org.kde.kirigami 2.20 as Kirigami
 import org.kde.plasma.components 3.0 as PlasmaComponents
 import org.kde.plasma.plasmoid 2.0
+import org.kde.notification 1.0
 
 PlasmoidItem {
-    readonly property bool isVertical: Plasmoid.formFactor === PlasmaCore.Types.Vertical
+    readonly property bool isVertical: true
     property bool isSmall: width < (Kirigami.Units.gridUnit * 10) || height < (Kirigami.Units.gridUnit * 10)
     property int languageIndex: Plasmoid.configuration.languageIndex !== undefined ? Plasmoid.configuration.languageIndex : 0
 
@@ -14,13 +16,13 @@ PlasmoidItem {
     height: Kirigami.Units.gridUnit * 22
     preferredRepresentation: isSmall ? compactRepresentation : fullRepresentation
 
-    //     Layout.minimumWidth: isVertical ? 0 : compactRow.implicitWidth
-    //     Layout.maximumWidth: isVertical ? Infinity : Layout.minimumWidth
-    //     Layout.preferredWidth: isVertical ? -1 : Layout.minimumWidth
+    // Layout.minimumWidth: isVertical ? Kirigami.Units.gridUnit * 15 : compactRow.implicitWidth
+    // Layout.maximumWidth: isVertical ? Infinity : Layout.minimumWidth
+    // Layout.preferredWidth: isVertical ? -1 : Layout.minimumWidth
 
-    //     Layout.minimumHeight: isVertical ? label.height : Kirigami.Theme.smallFont.pixelSize
-    //     Layout.maximumHeight: isVertical ? Layout.minimumHeight : Infinity
-    //     Layout.preferredHeight: isVertical ? Layout.minimumHeight : Kirigami.Units.iconSizes.sizeForLabels * 2
+    // Layout.minimumHeight: isVertical ? Kirigami.Units.gridUnit * 22 : Kirigami.Theme.smallFont.pixelSize
+    // Layout.maximumHeight: isVertical ? Layout.minimumHeight : Infinity
+    // Layout.preferredHeight: isVertical ? Layout.minimumHeight : Kirigami.Units.iconSizes.sizeForLabels * 2
 
     // compactRepresentation: MouseArea {
     //     id: compactRoot
@@ -66,23 +68,18 @@ PlasmoidItem {
     //     }
     // }
 
-    Connections {
-        target: Plasmoid
-        onConfigurationChanged: {
-            languageUpdate();  // Update language when configuration is altered
-        }
-    }
     compactRepresentation: CompactRepresentation {
     }
 
     fullRepresentation: Column {
         id: prayerClock
+        property var times: ({})
+        property string lastActivePrayer: ""
+        property string activePrayer: ""
 
         function languageUpdate() {
             languageIndex = Plasmoid.configuration.languageIndex; // change language
         }
-
-
         function to12HourTime(timeString, isActive) {
             if (isActive) {  // if checkbox is active, convert to 12-hour format
                 let parts = timeString.split(':');
@@ -99,8 +96,6 @@ PlasmoidItem {
                 return timeString;
             }
         }
-
-
         function parseTime(timeString) {
             let parts = timeString.split(':');
             let dateObj = new Date();
@@ -109,8 +104,6 @@ PlasmoidItem {
             dateObj.setSeconds(0);
             return dateObj;
         }
-
-
         function getPrayerName(languageIndex, prayer) {
             if (languageIndex === 0) {
                 return prayer;
@@ -126,9 +119,9 @@ PlasmoidItem {
                 return arabicPrayers[prayer];
             }
         }
-
-
-        function findHighlighted(timings) {
+        function highlightActivePrayer(timings) {
+            // assuming all timings are for current day
+            var currentPrayer = "";
             fajr.color = "transparent";
             sunrise.color = "transparent";
             dhuhr.color = "transparent";
@@ -147,88 +140,166 @@ PlasmoidItem {
             asrTime.color = Kirigami.Theme.textColor;
             maghribTime.color = Kirigami.Theme.textColor;
             ishaTime.color = Kirigami.Theme.textColor;
-            if (Date.now() > parseTime(timings.Isha)) {
+
+            if (Date.now() > parseTime(timings.Fajr) && Date.now() < parseTime(timings.Sunrise)) {
+                currentPrayer = "Fajr";
                 fajr.color = Kirigami.Theme.highlightColor;
                 fajrTitle.color = Kirigami.Theme.neutralBackgroundColor;
                 fajrTime.color = Kirigami.Theme.neutralBackgroundColor;
-            }
-            else if (Date.now() > parseTime(timings.Maghrib)) {
-                isha.color = Kirigami.Theme.highlightColor;
-                ishaTitle.color = Kirigami.Theme.neutralBackgroundColor;
-                ishaTime.color = Kirigami.Theme.neutralBackgroundColor;
-            } else if (Date.now() > parseTime(timings.Maghrib)) {
-                maghrib.color = Kirigami.Theme.highlightColor;
-                maghribTitle.color = Kirigami.Theme.neutralBackgroundColor;
-                maghribTime.color = Kirigami.Theme.neutralBackgroundColor;
-            } else if (Date.now() > parseTime(timings.Asr)) {
-                asr.color = Kirigami.Theme.highlightColor;
-                asrTitle.color = Kirigami.Theme.neutralBackgroundColor;
-                asrTime.color = Kirigami.Theme.neutralBackgroundColor;
-            } else if (Date.now() > parseTime(timings.Dhuhr)) {
-                dhuhr.color = Kirigami.Theme.highlightColor;
-                dhuhrTitle.color = Kirigami.Theme.neutralBackgroundColor;
-                dhuhrTime.color = Kirigami.Theme.neutralBackgroundColor;
-            } else if (Date.now() > parseTime(timings.Sunrise)) {
+            } else if (Date.now() > parseTime(timings.Sunrise) && Date.now() < parseTime(timings.Dhuhr)) {
+                currentPrayer = "Sunrise";
                 sunrise.color = Kirigami.Theme.highlightColor;
                 sunriseTitle.color = Kirigami.Theme.neutralBackgroundColor;
                 sunriseTime.color = Kirigami.Theme.neutralBackgroundColor;
-            } else if (Date.now() > parseTime(timings.Fajr)) {
-                fajr.color = Kirigami.Theme.highlightColor;
-                fajrTitle.color = Kirigami.Theme.neutralBackgroundColor;
-                fajrTime.color = Kirigami.Theme.neutralBackgroundColor;
+            } else if (Date.now() > parseTime(timings.Dhuhr) && Date.now() < parseTime(timings.Asr)) {
+                currentPrayer = "Dhuhr";
+                dhuhr.color = Kirigami.Theme.highlightColor;
+                dhuhrTitle.color = Kirigami.Theme.neutralBackgroundColor;
+                dhuhrTime.color = Kirigami.Theme.neutralBackgroundColor;
+            } else if (Date.now() > parseTime(timings.Asr) && Date.now() < parseTime(timings.Maghrib)) {
+                currentPrayer = "Asr";
+                asr.color = Kirigami.Theme.highlightColor;
+                asrTitle.color = Kirigami.Theme.neutralBackgroundColor;
+                asrTime.color = Kirigami.Theme.neutralBackgroundColor;
+            } else if (Date.now() > parseTime(timings.Maghrib) && Date.now() < parseTime(timings.Isha)) {
+            currentPrayer = "Maghrib";
+                maghrib.color = Kirigami.Theme.highlightColor;
+                maghribTitle.color = Kirigami.Theme.neutralBackgroundColor;
+                maghribTime.color = Kirigami.Theme.neutralBackgroundColor;
+            } else {
+                currentPrayer = "Isha";
+                isha.color = Kirigami.Theme.highlightColor;
+                ishaTitle.color = Kirigami.Theme.neutralBackgroundColor;
+                ishaTime.color = Kirigami.Theme.neutralBackgroundColor;
             }
+
+            lastActivePrayer = activePrayer;
+            activePrayer = currentPrayer;
+
+            if (lastActivePrayer !== currentPrayer) {
+                var notification = notificationComponent.createObject(parent);
+                notification.title = "It's " + activePrayer + " time";
+                notification.sendEvent();
+            }
+
+            return currentPrayer;
         }
-
-
-        function refresh_times() {
-            let URL = "https://api.aladhan.com/v1/timingsByCity/timingsByCity?city=" + Plasmoid.configuration.city + "&country=" + Plasmoid.configuration.country + "&method="  + Plasmoid.configuration.method + "&school=" + Plasmoid.configuration.school;
+        function fetchTimes(callback) {
+            let URL = "https://api.aladhan.com/v1/timingsByCity/timingsByCity?city=" + Plasmoid.configuration.city + "&country=" + Plasmoid.configuration.country + "&method=" + Plasmoid.configuration.method + "&school=" + Plasmoid.configuration.school;
             request(URL, (o) => {
                 if (o.status === 200) {
                     let data = JSON.parse(o.responseText).data;
-                    findHighlighted(data.timings);
+                    times = data.timings;
+                    times.date = data.date.gregorian.date;
 
-                    let isActive = Plasmoid.configuration.hourFormat;
-                    fajrTime.text = to12HourTime(data.timings.Fajr, isActive);
-                    sunriseTime.text = to12HourTime(data.timings.Sunrise, isActive);
-                    dhuhrTime.text = to12HourTime(data.timings.Dhuhr, isActive);
-                    asrTime.text = to12HourTime(data.timings.Asr, isActive);
-                    maghribTime.text = to12HourTime(data.timings.Maghrib, isActive);
-                    ishaTime.text = to12HourTime(data.timings.Isha, isActive);
+                    // var notification = notificationComponent.createObject(parent);
+                    // notification.text = JSON.stringify(data.timings);
+                    // notification.sendEvent();
+
+                    if (callback) callback(data.timings);
                 } else {
                     console.log("Some error has occurred");
+                    var notification = notificationComponent.createObject(parent);
+                    notification.title = "Could not update times. Are you connected to the internet?";
+                    notification.sendEvent();
+
+                    if (getFormattedDate(new Date()) != times.date) {
+                        times = {
+                            "Fajr": "00:00",
+                            "Sunrise": "00:00",
+                            "Dhuhr": "00:00",
+                            "Asr": "00:00",
+                            "Maghrib": "00:00",
+                            "Isha": "00:00"
+                        }
+                        updateDisplay();
+                    }
                 }
             });
         }
+        function updateDisplay(timings) {
+            var prayerTimes = timings || times;
+            highlightActivePrayer(prayerTimes);
 
-
+            let isActive = Plasmoid.configuration.hourFormat;
+            fajrTime.text = to12HourTime(prayerTimes.Fajr, isActive);
+            sunriseTime.text = to12HourTime(prayerTimes.Sunrise, isActive);
+            dhuhrTime.text = to12HourTime(prayerTimes.Dhuhr, isActive);
+            asrTime.text = to12HourTime(prayerTimes.Asr, isActive);
+            maghribTime.text = to12HourTime(prayerTimes.Maghrib, isActive);
+            ishaTime.text = to12HourTime(prayerTimes.Isha, isActive);
+        }
         function request(url, callback) {
             let xhr = new XMLHttpRequest();
             xhr.onreadystatechange = (function(myxhr) {
-                return function() {
-                    if (myxhr.readyState === 4)
-                        callback(myxhr);
-
+                return () => {
+                    if (myxhr.readyState === 4) callback(myxhr);
                 };
             })(xhr);
             xhr.open("GET", url);
             xhr.send();
         }
-
-
-        Component.onCompleted: {
-            refresh_times();
+        function getFormattedDate(givenDate) {
+            const today = givenDate;
+            const day = String(today.getDate()).padStart(2, "0");
+            const month = String(today.getMonth() + 1).padStart(2, "0");
+            const year = today.getFullYear();
+            return `${day}-${month}-${year}`;
         }
 
+
+
+        // onload
+        Component.onCompleted: {
+            fetchTimes(updateDisplay);
+            Plasmoid.configuration.valueChanged.connect((key, value) => {
+                fetchTimes(updateDisplay);
+            });
+        }
+        // loop
         Item {
             Timer {
-                interval: 300000 // repeat every 5 minutes
+                property string activePrayer: ""
+                interval: 30000 // repeat every 30 seconds
                 running: true
                 repeat: true
-                onTriggered: refresh_times()
-            }
+                onTriggered: () => {
+                    // what it should do
+                    // is look at the times, decides if it needs to actually fetch new times
+                    // if it does get new, if not check if it is time for a new prayer then notify and update highlight
+                    // all above code should be run when loaded as well
 
+                    // FIRST - save time just for today, and in loop check if it's a different day then fetch new times
+
+
+                    // data structure: store an array of prayer time days
+                    // update api url to fetch for current day
+
+                    // if there are no active prayer times (meaning was disconnected from internet but connected now) fetch them
+
+
+                    if (times && Object.keys(times).length > 0 && getFormattedDate(new Date()) === times.date) {
+                        updateDisplay(times);
+                    } else {
+                        fetchTimes(updateDisplay);
+                    }
+                }
+            }
         }
 
+
+        // Notification element
+        Component {
+            id: notificationComponent
+            Notification {
+                componentName: "plasma_workspace"
+                eventId: "notification"
+                // text: "Prayer Times Widget"
+                autoDelete: true
+            }
+        }
+
+        // Title, Location and Prayer Elements
         Column {
             width: parent.width * 5 / 6
             anchors.horizontalCenter: parent.horizontalCenter
@@ -254,10 +325,24 @@ PlasmoidItem {
                 bottomPadding: 10
             }
 
+
+            // Prayer times, refresh button
+
+            // a Repeater with this list model could be used to dynamically create the prayer time elements
+            // property var prayerModel: [
+            //     { name: "Fajr", id: "fajr" },
+            //     { name: "Sunrise", id: "sunrise" },
+            //     { name: "Dhuhr", id: "dhuhr" },
+            //     { name: "Asr", id: "asr" },
+            //     { name: "Maghrib", id: "maghrib" },
+            //     { name: "Isha", id: "isha" }
+            // ]
+
+
             Rectangle {
                 id: fajr
                 width: parent.width
-                color: Kirigami.Theme.neutralBackgroundColor
+                color: "transparent"
                 height: 28
                 radius: 8
 
@@ -270,8 +355,8 @@ PlasmoidItem {
                         text: getPrayerName(languageIndex, "Fajr")
                         Layout.alignment: Qt.AlignLeft
                         font.pixelSize: 20
-                        leftPadding: languageIndex === 0 ? 5 : 0
-                        rightPadding: languageIndex === 0 ? 0 : 5
+                        leftPadding: languageIndex === 0 ? 0 : Kirigami.Units.gridUnit * .25
+                        rightPadding: languageIndex === 0 ? Kirigami.Units.gridUnit * .25 : 0
                     }
 
                     Label {
@@ -281,13 +366,12 @@ PlasmoidItem {
                         Layout.alignment: Qt.AlignRight
                         color: Kirigami.Theme.textColor;
                         font.pixelSize: 20
-                        leftPadding: languageIndex === 0 ? 0 : 5
-                        rightPadding: languageIndex === 0 ? 5 : 0
+                        leftPadding: languageIndex === 0 ? 0 : Kirigami.Units.gridUnit * .25
+                        rightPadding: languageIndex === 0 ? Kirigami.Units.gridUnit * .25 : 0
                     }
                 }
 
             }
-
             MenuSeparator {
                 topPadding: 5
                 bottomPadding: 5
@@ -299,11 +383,10 @@ PlasmoidItem {
                 }
 
             }
-
             Rectangle {
                 id: sunrise
                 width: parent.width
-                color: Kirigami.Theme.neutralBackgroundColor
+                color: "transparent"
                 height: 28
                 radius: 8
 
@@ -316,9 +399,8 @@ PlasmoidItem {
                         text: getPrayerName(languageIndex, "Sunrise")
                         Layout.alignment: Qt.AlignLeft
                         font.pixelSize: 20
-                        leftPadding: languageIndex === 0 ? 5 : 0
-                        rightPadding: languageIndex === 0 ? 0 : 5
-
+                        leftPadding: languageIndex === 0 ? 0 : Kirigami.Units.gridUnit * .25
+                        rightPadding: languageIndex === 0 ? Kirigami.Units.gridUnit * .25 : 0
                     }
 
                     Label {
@@ -328,13 +410,12 @@ PlasmoidItem {
                         Layout.alignment: Qt.AlignRight
                         color: Kirigami.Theme.textColor;
                         font.pixelSize: 20
-                        leftPadding: languageIndex === 0 ? 0 : 5
-                        rightPadding: languageIndex === 0 ? 5 : 0
+                        leftPadding: languageIndex === 0 ? 0 : Kirigami.Units.gridUnit * .25
+                        rightPadding: languageIndex === 0 ? Kirigami.Units.gridUnit * .25 : 0
                     }
                 }
 
             }
-
             MenuSeparator {
                 topPadding: 5
                 bottomPadding: 5
@@ -346,11 +427,10 @@ PlasmoidItem {
                 }
 
             }
-
             Rectangle {
                 id: dhuhr
                 width: parent.width
-                color: Kirigami.Theme.neutralBackgroundColor
+                color: "transparent"
                 height: 28
                 radius: 8
 
@@ -363,9 +443,8 @@ PlasmoidItem {
                         text: getPrayerName(languageIndex, "Dhuhr")
                         Layout.alignment: Qt.AlignLeft
                         font.pixelSize: 20
-                        leftPadding: languageIndex === 0 ? 5 : 0
-                        rightPadding: languageIndex === 0 ? 0 : 5
-
+                        leftPadding: languageIndex === 0 ? 0 : Kirigami.Units.gridUnit * .25
+                        rightPadding: languageIndex === 0 ? Kirigami.Units.gridUnit * .25 : 0
                     }
 
                     Label {
@@ -375,13 +454,12 @@ PlasmoidItem {
                         Layout.alignment: Qt.AlignRight
                         color: Kirigami.Theme.textColor;
                         font.pixelSize: 20
-                        leftPadding: languageIndex === 0 ? 0 : 5
-                        rightPadding: languageIndex === 0 ? 5 : 0
+                        leftPadding: languageIndex === 0 ? 0 : Kirigami.Units.gridUnit * .25
+                        rightPadding: languageIndex === 0 ? Kirigami.Units.gridUnit * .25 : 0
                     }
                 }
 
             }
-
             MenuSeparator {
                 topPadding: 5
                 bottomPadding: 5
@@ -393,11 +471,10 @@ PlasmoidItem {
                 }
 
             }
-
             Rectangle {
                 id: asr
                 width: parent.width
-                color: Kirigami.Theme.neutralBackgroundColor
+                color: "transparent"
                 height: 28
                 radius: 8
 
@@ -410,9 +487,8 @@ PlasmoidItem {
                         text: getPrayerName(languageIndex, "Asr")
                         Layout.alignment: Qt.AlignLeft
                         font.pixelSize: 20
-                        leftPadding: languageIndex === 0 ? 5 : 0
-                        rightPadding: languageIndex === 0 ? 0 : 5
-
+                        leftPadding: languageIndex === 0 ? 0 : Kirigami.Units.gridUnit * .25
+                        rightPadding: languageIndex === 0 ? Kirigami.Units.gridUnit * .25 : 0
                     }
 
                     Label {
@@ -422,13 +498,12 @@ PlasmoidItem {
                         Layout.alignment: Qt.AlignRight
                         color: Kirigami.Theme.textColor;
                         font.pixelSize: 20
-                        leftPadding: languageIndex === 0 ? 0 : 5
-                        rightPadding: languageIndex === 0 ? 5 : 0
+                        leftPadding: languageIndex === 0 ? 0 : Kirigami.Units.gridUnit * .25
+                        rightPadding: languageIndex === 0 ? Kirigami.Units.gridUnit * .25 : 0
                     }
                 }
 
             }
-
             MenuSeparator {
                 topPadding: 5
                 bottomPadding: 5
@@ -440,11 +515,10 @@ PlasmoidItem {
                 }
 
             }
-
             Rectangle {
                 id: maghrib
                 width: parent.width
-                color: Kirigami.Theme.neutralBackgroundColor
+                color: "transparent"
                 height: 28
                 radius: 8
 
@@ -457,9 +531,8 @@ PlasmoidItem {
                         text: getPrayerName(languageIndex, "Maghrib")
                         Layout.alignment: Qt.AlignLeft
                         font.pixelSize: 20
-                        leftPadding: languageIndex === 0 ? 5 : 0
-                        rightPadding: languageIndex === 0 ? 0 : 5
-
+                        leftPadding: languageIndex === 0 ? 0 : Kirigami.Units.gridUnit * .25
+                        rightPadding: languageIndex === 0 ? Kirigami.Units.gridUnit * .25 : 0
                     }
 
                     Label {
@@ -469,13 +542,12 @@ PlasmoidItem {
                         Layout.alignment: Qt.AlignRight
                         color: Kirigami.Theme.textColor;
                         font.pixelSize: 20
-                        leftPadding: languageIndex === 0 ? 0 : 5
-                        rightPadding: languageIndex === 0 ? 5 : 0
+                        leftPadding: languageIndex === 0 ? 0 : Kirigami.Units.gridUnit * .25
+                        rightPadding: languageIndex === 0 ? Kirigami.Units.gridUnit * .25 : 0
                     }
                 }
 
             }
-
             MenuSeparator {
                 topPadding: 5
                 bottomPadding: 5
@@ -487,11 +559,10 @@ PlasmoidItem {
                 }
 
             }
-
             Rectangle {
                 id: isha
                 width: parent.width
-                color: Kirigami.Theme.neutralBackgroundColor
+                color: "transparent"
                 height: 28
                 radius: 8
 
@@ -504,9 +575,8 @@ PlasmoidItem {
                         text: getPrayerName(languageIndex, "Isha")
                         Layout.alignment: Qt.AlignLeft
                         font.pixelSize: 20
-                        leftPadding: languageIndex === 0 ? 5 : 0
-                        rightPadding: languageIndex === 0 ? 0 : 5
-
+                        leftPadding: languageIndex === 0 ? 0 : Kirigami.Units.gridUnit * .25
+                        rightPadding: languageIndex === 0 ? Kirigami.Units.gridUnit * .25 : 0
                     }
 
                     Label {
@@ -516,13 +586,12 @@ PlasmoidItem {
                         Layout.alignment: Qt.AlignRight
                         color: Kirigami.Theme.textColor;
                         font.pixelSize: 20
-                        leftPadding: languageIndex === 0 ? 0 : 5
-                        rightPadding: languageIndex === 0 ? 5 : 0
+                        leftPadding: languageIndex === 0 ? 0 : Kirigami.Units.gridUnit * .25
+                        rightPadding: languageIndex === 0 ? Kirigami.Units.gridUnit * .25 : 0
                     }
                 }
 
             }
-
             MenuSeparator {
                 topPadding: 10
                 bottomPadding: 10
@@ -531,9 +600,15 @@ PlasmoidItem {
             Button {
                 text: i18n("Refresh times")
                 anchors.horizontalCenter: parent.horizontalCenter
-                onClicked: refresh_times()
+                onClicked: {
+                    // also check that times are for correct day!
+                    if (times && Object.keys(times).length > 0 && getFormattedDate(new Date()) === times.date) {
+                        updateDisplay(times);
+                    } else {
+                        fetchTimes(updateDisplay);
+                    }
+                }
             }
-
         }
     }
 }

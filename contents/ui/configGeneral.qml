@@ -7,6 +7,7 @@ KCM.SimpleKCM {
     property alias cfg_city: cityField.text
     property alias cfg_country: countryField.text
     // property alias cfg_smallStyle: smallStyleField.currentValue
+    property alias cfg_notifications: notificationsCheckBox.checked
     property alias cfg_hourFormat: hourFormatCheckBox.checked
     property alias cfg_method: methodField.currentIndex
     property alias cfg_school: schoolField.currentIndex
@@ -52,6 +53,10 @@ KCM.SimpleKCM {
         CheckBox {
             id: hourFormatCheckBox
             Kirigami.FormData.label: i18n("12-Hour Format:")
+        }
+        CheckBox {
+            id: notificationsCheckBox
+            Kirigami.FormData.label: i18n("Notifications enabled:")
         }
     }
 }

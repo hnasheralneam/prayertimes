@@ -20,6 +20,9 @@
     <entry name="hourFormat" type="Bool">
       <default>true</default>
     </entry>
+    <entry name="notifications" type="Bool">
+      <default>true</default>
+    </entry>
     <entry name="languageIndex" type="Int">
       <default>0</default>
     </entry>

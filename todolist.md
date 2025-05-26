@@ -11,9 +11,4 @@ features
 - arabic text for notifications
 
 changelog
-- notification when time fails to update b/c no internet
-- update progress immedietly when config changes
-- fixed issue when time between midnight and fajr would show no active prayer
-- save prayer for current day, until plasmoid is reloaded
-- notifications when a prayer comes in
-- refresh times when a config is changed
+- setting to disable/enable prayer times

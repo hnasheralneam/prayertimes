@@ -176,7 +176,7 @@ PlasmoidItem {
             lastActivePrayer = activePrayer;
             activePrayer = currentPrayer;
 
-            if (lastActivePrayer !== currentPrayer) {
+            if (lastActivePrayer !== currentPrayer && Plasmoid.configuration.notifications) {
                 var notification = notificationComponent.createObject(parent);
                 notification.title = "It's " + activePrayer + " time";
                 notification.sendEvent();
@@ -191,17 +191,13 @@ PlasmoidItem {
                     let data = JSON.parse(o.responseText).data;
                     times = data.timings;
                     times.date = data.date.gregorian.date;
-
-                    // var notification = notificationComponent.createObject(parent);
-                    // notification.text = JSON.stringify(data.timings);
-                    // notification.sendEvent();
-
                     if (callback) callback(data.timings);
                 } else {
-                    console.log("Some error has occurred");
-                    var notification = notificationComponent.createObject(parent);
-                    notification.title = "Could not update times. Are you connected to the internet?";
-                    notification.sendEvent();
+                    if (Plasmoid.configuration.notifications) {
+                        var notification = notificationComponent.createObject(parent);
+                        notification.title = "Could not update times. Are you connected to the internet?";
+                        notification.sendEvent();
+                    }
 
                     if (getFormattedDate(new Date()) != times.date) {
                         times = {
@@ -601,9 +597,13 @@ PlasmoidItem {
                 text: i18n("Refresh times")
                 anchors.horizontalCenter: parent.horizontalCenter
                 onClicked: {
-                    // also check that times are for correct day!
                     if (times && Object.keys(times).length > 0 && getFormattedDate(new Date()) === times.date) {
                         updateDisplay(times);
+                        if (Plasmoid.configuration.notifications) {
+                            var notification = notificationComponent.createObject(parent);
+                            notification.title = "Refreshing prayer times";
+                            notification.sendEvent();
+                        }
                     } else {
                         fetchTimes(updateDisplay);
                     }

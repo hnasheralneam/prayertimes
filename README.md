@@ -8,3 +8,9 @@ This is a simple prayer times widget for KDE Plasma 6. The API usage code is fro
 
 ## Contributors
 Special thanks to @ammar-elmesaly and @MrGueest for their work on the project
+
+## Forks
+[salaatprayertime](https://github.com/MazenMohamed203/salaatprayertime) by @MazenMohamed203
+
+## Other widgets
+[ezanvakti (turkish)](https://github.com/necmettin1461/ezanvakti-widget) by @necmettin1461

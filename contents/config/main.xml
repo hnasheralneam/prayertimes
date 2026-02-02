@@ -32,6 +32,18 @@
     <entry name="method" type="Int">
       <default>2</default>
     </entry>
+    <entry name="locationType" type="String">
+      <default>city</default>
+    </entry>
+    <entry name="latitude" type="String">
+      <default></default>
+    </entry>
+    <entry name="longitude" type="String">
+      <default></default>
+    </entry>
+    <entry name="ipCity" type="String">
+      <default></default>
+    </entry>
    </group>
 
    <group name="About">
